@@ -1,0 +1,26 @@
+#! /usr/bin/env bash
+
+if ! command -v node >/dev/null; then
+  printf 'Install Node.js to run this demo: https://nodejs.org\n' >&2
+  exit 1
+elif [[ ! -d './node_modules' ]]; then
+  npm install || exit 1
+fi
+
+set -m
+
+if [[ "$1" == '--no-ws' ]]; then
+  node_modules/.bin/http-server . &
+else
+  node_modules/.bin/live-server --no-browser . &
+fi
+SERVER_PID="$!"
+sleep 2
+
+node_modules/.bin/phantomjs visit-site.js
+RESULT="$?"
+
+kill "$SERVER_PID"
+set +m
+
+exit "$RESULT"
