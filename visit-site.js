@@ -1,8 +1,6 @@
 'use strict'
 
-var fs = require('fs')
-var webpage = require('webpage')
-var page = webpage.create()
+var page = require('webpage').create()
 
 page.onLoadFinished = function(status) {
   console.log('STATUS:', status)
