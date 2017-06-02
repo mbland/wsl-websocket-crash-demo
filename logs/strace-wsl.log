@@ -1,0 +1,22 @@
+fcntl(8, F_SETFD, FD_CLOEXEC)           = 0
+read(8, "<?xml version=\"1.0\" encoding=\"ut"..., 16384) = 2719
+read(8, "", 13665)                      = 0
+close(8)                                = 0
+fcntl(8, F_SETFD, FD_CLOEXEC)           = 0
+read(8, "<?xml version=\"1.0\" encoding=\"ut"..., 16384) = 2719
+read(8, "", 13665)                      = 0
+close(8)                                = 0
+socket(PF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 8
+setsockopt(8, SOL_SOCKET, SO_OOBINLINE, [1], 4) = 0
+connect(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+getsockname(8, {sa_family=AF_INET, sin_port=htons(58904), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
+getpeername(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
+getsockopt(8, SOL_SOCKET, SO_TYPE, [1], [4]) = 0
+--- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_MAPERR, si_addr=0x500000022} ---
+write(2, "PhantomJS has crashed. Please re"..., 127PhantomJS has crashed. Please read the bug reporting guide at
+<http://phantomjs.org/bug-reporting.html> and file a bug report.
+) = 127
+tgkill(22020, 22020, SIGSEGV)           = 0
+--- SIGSEGV {si_signo=SIGSEGV, si_code=SI_TKILL, si_pid=22020, si_uid=1000} ---
++++ killed by SIGSEGV (core dumped) +++
+.../wsl-websocket-crash-demo/run-demo: line 78: 22018 Segmentation fault      (core dumped) "${PHANTOMJS_CMD[@]}"

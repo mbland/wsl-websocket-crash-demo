@@ -1,0 +1,71 @@
+#! /usr/bin/env bash
+#
+# Generates logs for all `run-demo [--no-ws|--debug|--strace]` permutations
+#
+# Usage:
+#  [DEMO_PLATFORM=...] collect-logs
+#
+# Output is stored in the `./logs/` directory. If you'd like to change the
+# default platform suffix for the log files, prefix the command line with
+# `DEMO_PLATFORM=...`.
+#
+# The strace output is filtered by the `STRACE_FILTER` command defined below.
+# Edit this file to change the values for `STRACE_FILTER` if so desired.
+
+declare DEMO_ROOTDIR="${0%/*}"
+declare RUN_DEMO
+declare STRACE_FILTER
+declare DEMO_LOG
+
+if ! cd "$DEMO_ROOTDIR"; then
+  printf "Couldn't change to %s; exiting.\n" "$DEMO_ROOTDIR" >&2
+  exit 1
+fi
+DEMO_ROOTDIR="$PWD"
+
+if [[ ! -d 'logs' ]] && ! mkdir 'logs'; then
+  printf 'Failed to make "logs" directory; exiting.\n' >&2
+  exit 1
+fi
+
+if ! command -v strace >/dev/null; then
+  printf "strace isn't available on this platform.\n" >&2
+  exit 1
+elif [[ -z "$DEMO_PLATFORM" ]]; then
+  if [[ -d '/mnt/c' ]]; then
+    DEMO_PLATFORM='wsl'
+  elif command -v lsb_release >/dev/null; then
+    DEMO_PLATFORM="$(lsb_release -i -s)-$(lsb_release -r -s)"
+  else 
+    printf '%s' 'Unable to determine platform;' \
+      $'please specify DEMO_PLATFORM on the command line.\n' >&2
+    exit 1
+  fi
+fi
+
+RUN_DEMO="$DEMO_ROOTDIR/run-demo"
+STRACE_FILTER=('sed'
+  '-e' "s#${DEMO_ROOTDIR%/*}#...#g"
+  '-e' '/CLOCK_MONOTONIC/d'
+  '-e' '/gettimeofday/d'
+  '-e' '/\/etc\/ssl/d'
+  '-e' '/\/usr\/share\/ca-certificates/d'
+  '-e' '/\/etc\/localtime/d'
+  '-e' '/^[fl]*stat[(]/d'
+  '-e' '/^open[(]/d')
+
+DEMO_LOG="logs/debug-no-websocket-${DEMO_PLATFORM}.log"
+printf '*** Collecting: %s ***\n' "$DEMO_LOG"
+"$RUN_DEMO" --debug --no-ws 2>&1 | tee "$DEMO_LOG"
+
+DEMO_LOG="logs/strace-no-websocket-${DEMO_PLATFORM}.log"
+printf '\n*** Collecting: %s ***\n' "$DEMO_LOG"
+"$RUN_DEMO" --strace --no-ws 2>&1 | "${STRACE_FILTER[@]}" | tee "$DEMO_LOG"
+
+DEMO_LOG="logs/debug-${DEMO_PLATFORM}.log"
+printf '\n*** Collecting: %s ***\n' "$DEMO_LOG"
+"$RUN_DEMO" --debug 2>&1 | tee "$DEMO_LOG"
+
+DEMO_LOG="logs/strace-${DEMO_PLATFORM}.log"
+printf '\n*** Collecting: %s ***\n' "$DEMO_LOG"
+"$RUN_DEMO" --strace 2>&1 | "${STRACE_FILTER[@]}" | tee "$DEMO_LOG"
