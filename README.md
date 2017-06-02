@@ -100,7 +100,7 @@ The `strace phantomjs` logs checked into the repo are heavily filtered by the
 `STRACE_FILTER` defined in `collect-logs`, and have had all lines removed just
 before the point at which the `index.html` file is successfully loaded (for
 `--no-ws`) or at which the crash occurs. The relevant output from
-`logs/strace-wsl.log` appears to be:
+`logs/wsl/strace.log` appears to be:
 
 ```
 socket(PF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 8
@@ -119,7 +119,7 @@ tgkill(22020, 22020, SIGSEGV)           = 0
 .../wsl-websocket-crash-demo/run-demo: line 78: 22018 Segmentation fault      (core dumped) "${PHANTOMJS_CMD[@]}"
 ```
 
-whereas `logs/strace-no-websocket-wsl.log` shows:
+whereas `logs/wsl/strace-no-websocket.log` shows:
 
 ```
 pselect6(4, [3], [], [], {0, 0}, {NULL, 8}) = 1 (in [3], left {0, 0})

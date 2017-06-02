@@ -6,7 +6,7 @@
 #  [DEMO_PLATFORM=...] collect-logs
 #
 # Output is stored in the `./logs/` directory. If you'd like to change the
-# default platform suffix for the log files, prefix the command line with
+# default platform directory for the log files, prefix the command line with
 # `DEMO_PLATFORM=...`.
 #
 # The strace output is filtered by the `STRACE_FILTER` command defined below.
@@ -15,6 +15,7 @@
 declare DEMO_ROOTDIR="${0%/*}"
 declare RUN_DEMO
 declare STRACE_FILTER
+declare DEMO_LOG_DIR
 declare DEMO_LOG
 
 if ! cd "$DEMO_ROOTDIR"; then
@@ -22,11 +23,6 @@ if ! cd "$DEMO_ROOTDIR"; then
   exit 1
 fi
 DEMO_ROOTDIR="$PWD"
-
-if [[ ! -d 'logs' ]] && ! mkdir 'logs'; then
-  printf 'Failed to make "logs" directory; exiting.\n' >&2
-  exit 1
-fi
 
 if ! command -v strace >/dev/null; then
   printf "strace isn't available on this platform.\n" >&2
@@ -43,6 +39,12 @@ elif [[ -z "$DEMO_PLATFORM" ]]; then
   fi
 fi
 
+DEMO_LOG_DIR="logs/$DEMO_PLATFORM"
+if [[ ! -d "$DEMO_LOG_DIR" ]] && ! mkdir -p "$DEMO_LOG_DIR"; then
+  printf 'Failed to make "%s" directory; exiting.\n' "$DEMO_LOG_DIR" >&2
+  exit 1
+fi
+
 RUN_DEMO="$DEMO_ROOTDIR/run-demo"
 STRACE_FILTER=('sed'
   '-e' "s#${DEMO_ROOTDIR%/*}#...#g"
@@ -54,18 +56,18 @@ STRACE_FILTER=('sed'
   '-e' '/^[fl]*stat[(]/d'
   '-e' '/^open[(]/d')
 
-DEMO_LOG="logs/debug-no-websocket-${DEMO_PLATFORM}.log"
+DEMO_LOG="${DEMO_LOG_DIR}/debug-no-websocket.log"
 printf '*** Collecting: %s ***\n' "$DEMO_LOG"
 "$RUN_DEMO" --debug --no-ws 2>&1 | tee "$DEMO_LOG"
 
-DEMO_LOG="logs/strace-no-websocket-${DEMO_PLATFORM}.log"
+DEMO_LOG="${DEMO_LOG_DIR}/strace-no-websocket.log"
 printf '\n*** Collecting: %s ***\n' "$DEMO_LOG"
 "$RUN_DEMO" --strace --no-ws 2>&1 | "${STRACE_FILTER[@]}" | tee "$DEMO_LOG"
 
-DEMO_LOG="logs/debug-${DEMO_PLATFORM}.log"
+DEMO_LOG="${DEMO_LOG_DIR}/debug.log"
 printf '\n*** Collecting: %s ***\n' "$DEMO_LOG"
 "$RUN_DEMO" --debug 2>&1 | tee "$DEMO_LOG"
 
-DEMO_LOG="logs/strace-${DEMO_PLATFORM}.log"
+DEMO_LOG="${DEMO_LOG_DIR}/strace.log"
 printf '\n*** Collecting: %s ***\n' "$DEMO_LOG"
 "$RUN_DEMO" --strace 2>&1 | "${STRACE_FILTER[@]}" | tee "$DEMO_LOG"
