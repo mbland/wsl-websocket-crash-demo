@@ -1,0 +1,89 @@
+fcntl(8, F_SETFD, FD_CLOEXEC)           = 0
+read(8, "<?xml version=\"1.0\" encoding=\"ut"..., 16384) = 2818
+read(8, "", 13566)                      = 0
+close(8)                                = 0
+fcntl(8, F_SETFD, FD_CLOEXEC)           = 0
+read(8, "<?xml version=\"1.0\" encoding=\"ut"..., 16384) = 2818
+read(8, "", 13566)                      = 0
+close(8)                                = 0
+socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 8
+setsockopt(8, SOL_SOCKET, SO_OOBINLINE, [1], 4) = 0
+connect(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, 16) = -1 EINPROGRESS (Operation now in progress)
+pselect6(9, [3], [8], [], {0, 0}, {NULL, 8}) = 1 (out [8], left {0, 0})
+connect(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+getsockname(8, {sa_family=AF_INET, sin_port=htons(50936), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
+getpeername(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
+getsockopt(8, SOL_SOCKET, SO_TYPE, [1], [4]) = 0
+write(3, "\1\0\0\0\0\0\0\0", 8)         = 8
+pselect6(9, [3 8], [8], [], {0, 41000000}, {NULL, 8}) = 2 (in [3], out [8], left {0, 40998585})
+read(3, "\1\0\0\0\0\0\0\0", 8)          = 8
+write(8, "GET //ws HTTP/1.1\r\nUpgrade: webs"..., 396) = 396
+pselect6(9, [3 8], [], [], {0, 41000000}, {NULL, 8}) = 1 (in [3], left {0, 40803066})
+read(3, "\1\0\0\0\0\0\0\0", 8)          = 8
+write(3, "\1\0\0\0\0\0\0\0", 8)         = 8
+pselect6(9, [3 8], [], [], {0, 0}, {NULL, 8}) = 1 (in [3], left {0, 0})
+read(3, "\1\0\0\0\0\0\0\0", 8)          = 8
+write(3, "\1\0\0\0\0\0\0\0", 8)         = 8
+write(1, "STATUS: success\n", 16STATUS: success
+)       = 16
+write(1, "<!DOCTYPE html><html><head>\n  </"..., 1247<!DOCTYPE html><html><head>
+  </head>
+  <body>
+  <!-- Code injected by live-server -->
+<script type="text/javascript">
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function() {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					head.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					head.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function(msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			console.log('Live reload enabled.');
+		})();
+	}
+	// ]]>
+</script>
+
+
+</body></html>
+) = 1247
+close(8)                                = 0
+mmap(NULL, 126976, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_NORESERVE, -1, 0) = 0x7f146833b000
+madvise(0x7f146833b000, 126976, MADV_DONTNEED) = 0
+mprotect(0x7f1468340000, 65536, PROT_READ|PROT_WRITE) = 0
+madvise(0x7f1468340000, 65536, MADV_WILLNEED) = 0
+mprotect(0x7f1469c6b000, 4096, PROT_READ|PROT_WRITE|PROT_EXEC) = 0
+madvise(0x7f1469c6b000, 4096, MADV_WILLNEED) = 0
+mprotect(0x7f1469c6c000, 4096, PROT_READ|PROT_WRITE|PROT_EXEC) = 0
+madvise(0x7f1469c6c000, 4096, MADV_WILLNEED) = 0
+mmap(NULL, 1056768, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f1468239000
+mmap(0x7f1468239000, 4096, PROT_NONE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7f1468239000
+mmap(0x7f146833a000, 4096, PROT_NONE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7f146833a000
+write(6, "\1\0\0\0\0\0\0\0", 8)         = 8
+futex(0x639e1e0, FUTEX_WAKE_PRIVATE, 1) = 1
+write(4, "\1\0\0\0\0\0\0\0", 8)         = 8
+munmap(0x7f14ac6c7000, 266240)          = 0
+read(4, "0\n", 8192)                    = 2
+close(4)                                = 0
+close(3)                                = 0
+close(5)                                = 0
+munmap(0x7f1469447000, 132684)          = 0
+exit_group(0)                           = ?
++++ exited with 0 +++

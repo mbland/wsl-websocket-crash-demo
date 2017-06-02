@@ -119,21 +119,47 @@ tgkill(22020, 22020, SIGSEGV)           = 0
 .../wsl-websocket-crash-demo/run-demo: line 78: 22018 Segmentation fault      (core dumped) "${PHANTOMJS_CMD[@]}"
 ```
 
-whereas `logs/wsl/strace-no-websocket.log` shows:
+whereas `logs/Ubuntu-17.04/strace.log` shows the following; note the use of
+[`AF_INET` instead of `PF_INET`][af_inet] in the call to `socket`, in case
+that's relevant:
+
+[af_inet]: https://stackoverflow.com/questions/6729366/what-is-the-difference-between-af-inet-and-pf-inet-in-socket-programming
 
 ```
-pselect6(4, [3], [], [], {0, 0}, {NULL, 8}) = 1 (in [3], left {0, 0})
+socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 8
+setsockopt(8, SOL_SOCKET, SO_OOBINLINE, [1], 4) = 0
+connect(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, 16) = -1 EINPROGRESS (Operation now in progress)
+pselect6(9, [3], [8], [], {0, 0}, {NULL, 8}) = 1 (out [8], left {0, 0})
+connect(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+getsockname(8, {sa_family=AF_INET, sin_port=htons(50936), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
+getpeername(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
+getsockopt(8, SOL_SOCKET, SO_TYPE, [1], [4]) = 0
+write(3, "\1\0\0\0\0\0\0\0", 8)         = 8
+pselect6(9, [3 8], [8], [], {0, 41000000}, {NULL, 8}) = 2 (in [3], out [8], left {0, 40998585})
+read(3, "\1\0\0\0\0\0\0\0", 8)          = 8
+write(8, "GET //ws HTTP/1.1\r\nUpgrade: webs"..., 396) = 396
+pselect6(9, [3 8], [], [], {0, 41000000}, {NULL, 8}) = 1 (in [3], left {0, 40803066})
+read(3, "\1\0\0\0\0\0\0\0", 8)          = 8
+write(3, "\1\0\0\0\0\0\0\0", 8)         = 8
+pselect6(9, [3 8], [], [], {0, 0}, {NULL, 8}) = 1 (in [3], left {0, 0})
 read(3, "\1\0\0\0\0\0\0\0", 8)          = 8
 write(3, "\1\0\0\0\0\0\0\0", 8)         = 8
 write(1, "STATUS: success\n", 16STATUS: success
 )       = 16
-write(1, "<!DOCTYPE html><html><head>\n  </"..., 66<!DOCTYPE html><html><head>
+write(1, "<!DOCTYPE html><html><head>\n  </"..., 1247<!DOCTYPE html><html><head>
   </head>
   <body>
-  
+  <!-- Code injected by live-server -->
+<script type="text/javascript">
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+  // ...snip...
+</script>
+
 
 </body></html>
-) = 66
+) = 1247
+
 ```
 
 You can edit and re-run `collect-logs` or run `./run-demo --strace` directly to

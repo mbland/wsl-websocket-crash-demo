@@ -2,7 +2,7 @@ Starting up http-server, serving .
 Available on:
   http://127.0.0.1:8080
 Hit CTRL-C to stop the server
-Running PhantomJS as: node_modules/phantomjs-prebuilt/lib/phantom/bin/phantomjs --debug=true /home/msb/src/mbland/wsl-websocket-crash-demo/visit-site.js
+Running PhantomJS as: node_modules/phantomjs-prebuilt/lib/phantom/bin/phantomjs --debug=true .../mbland/wsl-websocket-crash-demo/visit-site.js
 2017-06-02T13:48:56 [DEBUG] CookieJar - Created but will not store cookies (use option '--cookies-file=<filename>' to enable persistent cookie storage)
 2017-06-02T13:48:56 [DEBUG] Set  "http"  proxy to:  "" : 1080
 2017-06-02T13:48:56 [DEBUG] Phantom - execute: Configuration
@@ -38,7 +38,7 @@ Running PhantomJS as: node_modules/phantomjs-prebuilt/lib/phantom/bin/phantomjs 
 2017-06-02T13:48:56 [DEBUG]      29 webdriverLogLevel : "INFO"
 2017-06-02T13:48:56 [DEBUG]      30 webdriverSeleniumGridHub : ""
 2017-06-02T13:48:56 [DEBUG] Phantom - execute: Script & Arguments
-2017-06-02T13:48:56 [DEBUG]      script: "/home/msb/src/mbland/wsl-websocket-crash-demo/visit-site.js"
+2017-06-02T13:48:56 [DEBUG]      script: ".../mbland/wsl-websocket-crash-demo/visit-site.js"
 2017-06-02T13:48:56 [DEBUG] Phantom - execute: Starting normal mode
 2017-06-02T13:48:56 [DEBUG] WebPage - setupFrame ""
 2017-06-02T13:48:56 [DEBUG] FileSystem - _open: ":/modules/fs.js" QMap(("mode", QVariant(QString, "r")))
