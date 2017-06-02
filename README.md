@@ -33,6 +33,16 @@ $ ./run-demo
 Serving "." at http://127.0.0.1:8080
 Ready for changes
 STATUS: success
+<!DOCTYPE html><html><head>
+  </head>
+  <body>
+  <!-- Code injected by live-server -->
+<script type="text/javascript">
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+
+        // ...snip...
+</script>
 ```
 
 The second example is from the Windows Subsystem for Linux as described in
