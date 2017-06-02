@@ -96,11 +96,14 @@ output, both with and without WebSockets (`--no-ws`), on both native Ubuntu
 Linux and Windows Subsystem for Linux. The files were generated all at once by
 running `./collect-logs`.
 
-The `strace phantomjs` logs checked into the repo are heavily filtered by the
-`STRACE_FILTER` defined in `collect-logs`, and have had all lines removed just
+The `logs/wsl/debug.log` and `logs/wsl/strace.log` files contain crash-related
+output. All other log files contain output from successful runs. I've heavily
+filtered and edited the `logs/*/strace*.log` files to remove all lines just
 before the point at which the `index.html` file is successfully loaded (for
-`--no-ws`) or at which the crash occurs. The relevant output from
-`logs/wsl/strace.log` appears to be:
+`--no-ws`) or at which the crash occurs. The full strace output can be generated
+via `run-demo --strace`.
+
+The relevant output from `logs/wsl/strace.log` appears to be:
 
 ```
 socket(PF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 8
