@@ -10,7 +10,7 @@ This appears germane to [Microsoft/BashOnWindows#903][#903].
 [wsl]:     https://blogs.msdn.microsoft.com/commandline/2017/04/11/windows-10-creators-update-whats-new-in-bashwsl-windows-console/
 [#903]:    https://github.com/Microsoft/BashOnWindows/issues/903
 
-**NOTE:** See [the final section for a report on the culprit][#culprit].
+**NOTE:** See [the final section for a report on the culprit](#culprit).
 
 The `./run-demo` script installs PhantomJS 2.1.1 via the [phantomjs-prebuilt][]
 npm package, and uses the [live-server][] package to serve `index.html` and
