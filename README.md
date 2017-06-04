@@ -10,6 +10,8 @@ This appears germane to [Microsoft/BashOnWindows#903][#903].
 [wsl]:     https://blogs.msdn.microsoft.com/commandline/2017/04/11/windows-10-creators-update-whats-new-in-bashwsl-windows-console/
 [#903]:    https://github.com/Microsoft/BashOnWindows/issues/903
 
+**NOTE:** See [the final section for a report on the culprit][#culprit].
+
 The `./run-demo` script installs PhantomJS 2.1.1 via the [phantomjs-prebuilt][]
 npm package, and uses the [live-server][] package to serve `index.html` and
 reproduce the crash, since it injects JavaScript code for signalling a reload
@@ -103,135 +105,180 @@ before the point at which the `index.html` file is successfully loaded (for
 `--no-ws`) or at which the crash occurs. The full strace output can be generated
 via `run-demo --strace`.
 
-The relevant output from `logs/wsl/strace.log` appears to be:
+You can edit and re-run `collect-logs` or run `./run-demo --strace` directly to
+generate the complete strace output.
 
-```
-socket(PF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 8
-setsockopt(8, SOL_SOCKET, SO_OOBINLINE, [1], 4) = 0
-connect(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
-getsockname(8, {sa_family=AF_INET, sin_port=htons(58904), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
-getpeername(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
-getsockopt(8, SOL_SOCKET, SO_TYPE, [1], [4]) = 0
---- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_MAPERR, si_addr=0x500000022} ---
-write(2, "PhantomJS has crashed. Please re"..., 127PhantomJS has crashed. Please read the bug reporting guide at
-<http://phantomjs.org/bug-reporting.html> and file a bug report.
-) = 127
-tgkill(22020, 22020, SIGSEGV)           = 0
---- SIGSEGV {si_signo=SIGSEGV, si_code=SI_TKILL, si_pid=22020, si_uid=1000} ---
-+++ killed by SIGSEGV (core dumped) +++
-.../wsl-websocket-crash-demo/run-demo: line 78: 22018 Segmentation fault      (core dumped) "${PHANTOMJS_CMD[@]}"
-```
+### Culprit
 
-whereas `logs/Ubuntu-17.04/strace.log` shows the following; note the use of
-[`AF_INET` instead of `PF_INET`][af_inet] in the call to `socket`, in case
-that's relevant:
+At this point I'm reasonably certain that the failure is due to the [present
+lack of support for nonblocking `connect()` calls on WSL][wsl-nonblock]
+(Microsoft/BashOnWindows#1584) throwing off the low-level QT socket libraries.
+The presence of `pselect()` calls in the successful, native Ubuntu strace logs
+was a hint: [nonblocking `connect()` calls typically return `EINPROGRESS`, after
+which clients should use `select()` (or `pselect()`) to wait for the socket to
+be writable][EINPROGRESS]:
 
-[af_inet]: https://stackoverflow.com/questions/6729366/what-is-the-difference-between-af-inet-and-pf-inet-in-socket-programming
+[wsl-nonblock]: https://github.com/Microsoft/BashOnWindows/issues/1584#issuecomment-271915483
+[EINPROGRESS]: https://stackoverflow.com/questions/8277970/what-are-possible-reason-for-socket-error-einprogress-in-solaris
+
+Compare the system calls from `logs/Ubuntu-17.04-debug/strace.log`:
 
 ```
 socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 8
 setsockopt(8, SOL_SOCKET, SO_OOBINLINE, [1], 4) = 0
 connect(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, 16) = -1 EINPROGRESS (Operation now in progress)
-pselect6(9, [3], [8], [], {0, 0}, {NULL, 8}) = 1 (out [8], left {0, 0})
+write(3, "\1\0\0\0\0\0\0\0", 8)         = 8
+pselect6(9, [3], [8], [], {0, 0}, {NULL, 8}) = 2 (in [3], out [8], left {0, 0})
+read(3, "\1\0\0\0\0\0\0\0", 8)          = 8
 connect(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
-getsockname(8, {sa_family=AF_INET, sin_port=htons(50936), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
+getsockname(8, {sa_family=AF_INET, sin_port=htons(53438), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
 getpeername(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
 getsockopt(8, SOL_SOCKET, SO_TYPE, [1], [4]) = 0
 write(3, "\1\0\0\0\0\0\0\0", 8)         = 8
-pselect6(9, [3 8], [8], [], {0, 41000000}, {NULL, 8}) = 2 (in [3], out [8], left {0, 40998585})
-read(3, "\1\0\0\0\0\0\0\0", 8)          = 8
-write(8, "GET //ws HTTP/1.1\r\nUpgrade: webs"..., 396) = 396
-pselect6(9, [3 8], [], [], {0, 41000000}, {NULL, 8}) = 1 (in [3], left {0, 40803066})
-read(3, "\1\0\0\0\0\0\0\0", 8)          = 8
-write(3, "\1\0\0\0\0\0\0\0", 8)         = 8
-pselect6(9, [3 8], [], [], {0, 0}, {NULL, 8}) = 1 (in [3], left {0, 0})
-read(3, "\1\0\0\0\0\0\0\0", 8)          = 8
-write(3, "\1\0\0\0\0\0\0\0", 8)         = 8
 write(1, "STATUS: success\n", 16STATUS: success
 )       = 16
-write(1, "<!DOCTYPE html><html><head>\n  </"..., 1247<!DOCTYPE html><html><head>
-  </head>
-  <body>
-  <!-- Code injected by live-server -->
-<script type="text/javascript">
-	// <![CDATA[  <-- For SVG support
-	if ('WebSocket' in window) {
-  // ...snip...
-</script>
-
-
-</body></html>
-) = 1247
-
 ```
 
-You can edit and re-run `collect-logs` or run `./run-demo --strace` directly to
-generate the complete strace output.
-
-### GDB logs
-
-GDB logs from a debug build of the PhantomJS 2.1.1 binary are in the `gdb/`
-directory. `gdb/stack-trace.txt` shows that the crash is definitely
-WebSocket-related, but the crash now happens due to a failing `ASSERT`,
-ostensibly because of a null pointer reference:
+to those from `logs/wsl-debug/strace.log`:
 
 ```
-ASSERTION FAILED: handle == m_handle
-Modules/websockets/WebSocketChannel.cpp(257) : virtual void WebCore::WebSocketChannel::didOpenSocketStream(WebCore::SocketStreamHandle*)
+socket(PF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 8
+setsockopt(8, SOL_SOCKET, SO_OOBINLINE, [1], 4) = 0
+connect(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+getsockname(8, {sa_family=AF_INET, sin_port=htons(62351), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
+getpeername(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
+getsockopt(8, SOL_SOCKET, SO_TYPE, [1], [4]) = 0
+write(2, "ASSERTION FAILED: handle == m_ha"..., 37ASSERTION FAILED: handle == m_handle
+) = 37
+write(2, "Modules/websockets/WebSocketChan"..., 137Modules/websockets/WebSocketChannel.cpp(257) : virtual void WebCore::WebSocketChannel::didOpenSocketStream(WebCore::SocketStreamHandle*)
+) = 137
+
 ...snip...
 
-Thread 1 "phantomjs" received signal SIGSEGV, Segmentation fault.
-0x000000000a1edf70 in WTFCrash () at wtf/Assertions.cpp:345
-345     wtf/Assertions.cpp: No such file or directory.
-
-(gdb) where
-#0  0x000000000a1edf70 in WTFCrash () at wtf/Assertions.cpp:345#1  0x000000000907f702 in WebCore::WebSocketChannel::didOpenSocketStream (this=0xdd396b0, handle=0xdd2dcb0) at Modules/websockets/WebSocketChannel.cpp:257
-#2  0x0000000009098158 in WebCore::SocketStreamHandlePrivate::socketConnected (this=0xdd2dd50) at platform/network/qt/SocketStreamHandleQt.cpp:107
-...snip...
-
-(gdb) up
-#1  0x000000000907f702 in WebCore::WebSocketChannel::didOpenSocketStream (this=0xdce4b90, handle=0xdcc0a50) at Modules/websockets/WebSocketChannel.cpp:257
-257     Modules/websockets/WebSocketChannel.cpp: No such file or directory.
-(gdb) print handle
-$1 = (WebCore::SocketStreamHandle *) 0xdcc0a50
-(gdb) print m_handle
-$2 = {m_ptr = 0x0}
+--- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_MAPERR, si_addr=0xbbadbeef} ---
+write(2, "PhantomJS has crashed. Please re"..., 127PhantomJS has crashed. Please read the bug reporting guide at
+<http://phantomjs.org/bug-reporting.html> and file a bug report.
+) = 127
+tgkill(25568, 25568, SIGSEGV)           = 0
+--- SIGSEGV {si_signo=SIGSEGV, si_code=SI_TKILL, si_pid=25568, si_uid=1000} ---
++++ killed by SIGSEGV (core dumped) +++
+.../wsl-websocket-crash-demo/run-demo: line 79: 25566 Segmentation fault      (core dumped) "${PHANTOMJS_CMD[@]}"
 ```
 
-`gdb/connect.txt` shows the location of the `connect()` calls leading up to
-the crash on WSL, and `gdb/connect-native.txt` shows the `connect()` calls for
-a successful run on native Ubuntu. Of note:
+We'll piece together three related stack traces from `gdb/socket.txt`,
+`gdb/connect.txt`, and `gdb/stack-trace.txt` to demonstrate how this series of
+system calls were generated and led to the crash. All of them come from a call
+to `WebCore::WebSocket::create`, which results in a call to
+`QAbstractSocket::connectToHost`:
 
-* Whereas WSL spawns one connection from `clone()`, native Ubuntu spawns two.
-* Both spawn a connection for a WebSocket.
-* Native Ubuntu appears to spawn one more connection from an incoming event,
-  while WSL appears to crash while spawining the previous connection (see
-  `gdb/stack-trace.txt`).
-* The stacks begin to diverge in `QAbstractSocketPrivate::_q_connectToNextAddress`:
-  * The `connect()` stack points to `socket/qabstractsocket.cpp:1130`
-  * The crash stack points to `socket/qabstractsocket.cpp:1132`
-
-Top of the `connect()` stack before the crash:
 ```
-#0  connect () at ../sysdeps/unix/syscall-template.S:84
-#1  0x000000000a6bdebd in qt_safe_connect (sockfd=8, addr=0x7ffffffdb350, addrlen=16)
-    at ../../include/QtNetwork/5.5.1/QtNetwork/private/../../../../../src/network/socket/qnet_unix_p.h:141
-#2  0x000000000a6be856 in QNativeSocketEnginePrivate::nativeConnect (this=0xdcc6310, addr=..., port=8080) at socket/qnativesocketengine_unix.cpp:389
-#3  0x000000000a6bb68a in QNativeSocketEngine::connectToHost (this=0xdd215b0, address=..., port=8080) at socket/qnativesocketengine.cpp:541
-#4  0x000000000a6b1167 in QAbstractSocketPrivate::_q_connectToNextAddress (this=0xdd3e490) at socket/qabstractsocket.cpp:1130
-#5  0x000000000a6b0ef9 in QAbstractSocketPrivate::_q_startConnecting (this=0xdd3e490, hostInfo=...) at socket/qabstractsocket.cpp:1067
-#6  0x000000000a6b2711 in QAbstractSocket::connectToHost (this=0xdd3cb40, hostName=..., port=8080, openMode=..., protocol=QAbstractSocket::AnyIPProtocol)
+#10 0x000000000a6b2711 in QAbstractSocket::connectToHost (this=0xdce5270, hostName=..., port=8080, openMode=..., protocol=QAbstractSocket::AnyIPProtocol)
     at socket/qabstractsocket.cpp:1652
-#7  0x0000000009097aa6 in WebCore::SocketStreamHandlePrivate::SocketStreamHandlePrivate (this=0xdd29ba0, streamHandle=0xdd29b00, url=...)
+#11 0x0000000009097aa6 in WebCore::SocketStreamHandlePrivate::SocketStreamHandlePrivate (this=0xdd2dd50, streamHandle=0xdd2dcb0, url=...)
     at platform/network/qt/SocketStreamHandleQt.cpp:70
-#8  0x0000000009098cc1 in WebCore::SocketStreamHandle::SocketStreamHandle (this=0xdd29b00, url=..., client=0xdd452b0)
+#12 0x0000000009098cc1 in WebCore::SocketStreamHandle::SocketStreamHandle (this=0xdd2dcb0, url=..., client=0xdd396b0)
     at platform/network/qt/SocketStreamHandleQt.cpp:190
-#9  0x000000000907e2c0 in WebCore::SocketStreamHandle::create (url=..., client=0xdd452b0) at platform/network/qt/SocketStreamHandle.h:58
-#10 0x000000000907e91c in WebCore::WebSocketChannel::connect (this=0xdd452b0, url=..., protocol=...) at Modules/websockets/WebSocketChannel.cpp:114
-#11 0x000000000907b899 in WebCore::WebSocket::connect (this=0xdd44f60, url=..., protocols=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:289
+#13 0x000000000907e2c0 in WebCore::SocketStreamHandle::create (url=..., client=0xdd396b0) at platform/network/qt/SocketStreamHandle.h:58
+#14 0x000000000907e91c in WebCore::WebSocketChannel::connect (this=0xdd396b0, url=..., protocol=...) at Modules/websockets/WebSocketChannel.cpp:114
+#15 0x000000000907b899 in WebCore::WebSocket::connect (this=0xdd20ae0, url=..., protocols=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:289
+#16 0x000000000907abf7 in WebCore::WebSocket::create (context=0xdcc3610, url=..., protocols=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:186
+#17 0x000000000907aaba in WebCore::WebSocket::create (context=0xdcc3610, url=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:173
 ```
 
-Top of the stack trace from the crash:
+The paths to QT source files that follow are relative to the root of the
+PhantomJS repo at tag `2.1.1` after running `python ./build.py -d`. The critical
+point of each stack trace is this block from `QAbstractSocket::connectToHost`
+around line 1652:
+
+```c++
+        d->_q_startConnecting(info);
+````
+
+The stack trace for the WSL `socket()` call (`gdb/socket.txt`) file shows
+that at this point, the the underlying socket is created by a call to
+`QNativeSocketEnginePrivate::createNewSocket` at
+`src/qt/qtbase/src/network/socket/qnativesocketengine_unix.cpp:219`. This line
+creates a socket with the nonblocking option hardcoded:
+
+```c++
+  int socket = qt_safe_socket(protocol, type, 0, O_NONBLOCK);
+```
+
+The stack trace for the WSL `connect()` call (`gdb/connect.txt`) shows a call to 
+`QAbstractSocketPrivate::_q_connectToNextAddress` at
+`src/qt/qtbase/src/network/socket/qabstractsocket.cpp:1130`, which is the
+beginnning of this block:
+
+```c++
+        // Tries to connect to the address. If it succeeds immediately
+        // (localhost address on BSD or any UDP connect), emit
+        // connected() and return.
+        if (socketEngine->connectToHost(host, port)) {
+            //_q_testConnection();
+            fetchConnectionParameters();
+            return;
+        }
+```
+
+This `QNativeSocketEngine::connectToHost` call (note: different from the 
+`QAbstractSocket::connectToHost` call higher in the stack) in turn calls
+`QNativeSocketEnginePrivate::nativeConnect` at 
+`src/qt/qtbase/src/network/socket/qnativesocketengine_unix.cpp:389`, which
+points to a call to `qt_safe_connect`:
+
+```c++
+    int connectResult = qt_safe_connect(socketDescriptor, sockAddrPtr, sockAddrSize);
+#if defined (QNATIVESOCKETENGINE_DEBUG)
+    int ecopy = errno;
+#endif
+    if (connectResult == -1) {
+        switch (errno) {
+        // ...snip ...
+        case EINPROGRESS:
+        case EALREADY:
+            setError(QAbstractSocket::UnfinishedSocketOperationError,
+InvalidSocketErrorString);
+            socketState = QAbstractSocket::ConnectingState;
+            break;
+        // ...snip...
+        default:
+            break;
+        }
+
+        if (socketState != QAbstractSocket::ConnectedState) {
+            // ...snip...
+            return false;
+        }
+    }
+
+    // ...snip...
+
+    socketState = QAbstractSocket::ConnectedState;
+    return true;
+```
+
+If the underlying `connect()` and `qt_safe_connect` had returned `EINPROGRESS`,
+the correct `socketState` would've been set,
+`NativeSocketEnginePrivate::nativeConnect` would've returned `false`, and
+`QAbstractSocketPrivate::_q_connectToNextAddress` would've set up the
+`pselect()` notification. Instead, `connect()` returns zero and the function
+returns `true`, leading to the
+`QAbstractSocketPrivate::fetchConnectionParameters` call at
+`src/qt/qtbase/src/network/socket/qabstractsocket.cpp:1132`:
+
+```c++
+        // Tries to connect to the address. If it succeeds immediately
+        // (localhost address on BSD or any UDP connect), emit
+        // connected() and return.
+        if (socketEngine->connectToHost(host, port)) {
+            //_q_testConnection();
+            fetchConnectionParameters();
+            return;
+        }
+```
+
+This in turn produces our final stack trace:
+
 ```
 #0  0x000000000a1edf70 in WTFCrash () at wtf/Assertions.cpp:345#1  0x000000000907f702 in WebCore::WebSocketChannel::didOpenSocketStream (this=0xdd396b0, handle=0xdd2dcb0) at Modules/websockets/WebSocketChannel.cpp:257
 #2  0x0000000009098158 in WebCore::SocketStreamHandlePrivate::socketConnected (this=0xdd2dd50) at platform/network/qt/SocketStreamHandleQt.cpp:107
@@ -253,9 +300,28 @@ Top of the stack trace from the crash:
 #13 0x000000000907e2c0 in WebCore::SocketStreamHandle::create (url=..., client=0xdd396b0) at platform/network/qt/SocketStreamHandle.h:58
 #14 0x000000000907e91c in WebCore::WebSocketChannel::connect (this=0xdd396b0, url=..., protocol=...) at Modules/websockets/WebSocketChannel.cpp:114
 #15 0x000000000907b899 in WebCore::WebSocket::connect (this=0xdd20ae0, url=..., protocols=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:289
-
+#16 0x000000000907abf7 in WebCore::WebSocket::create (context=0xdcc3610, url=..., protocols=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:186
+#17 0x000000000907aaba in WebCore::WebSocket::create (context=0xdcc3610, url=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:173
 ```
 
-`gdb/pselect.txt` shows that the program makes use of the `pselect()` system
-call, which may or may not be related to the issue, via `qt_safe_select` in
-`qt/qtbase/src/corelib/kernel/qcore_unix.cpp`.
+The assertion in `WebCore::WebSocketChannel::didOpenSocketStream` at
+`src/qt/qtwebkit/Source/WebCore/Modules/websockets/WebSocketChannel.cpp:257` is:
+
+```c++
+void WebSocketChannel::didOpenSocketStream(SocketStreamHandle* handle)
+{
+    LOG(Network, "WebSocketChannel %p didOpenSocketStream()", this);
+    ASSERT(handle == m_handle);
+```
+
+which under further inspection in GDB reveals:
+
+```
+(gdb) up
+#1  0x000000000907f702 in WebCore::WebSocketChannel::didOpenSocketStream (this=0xdce4b90, handle=0xdcc0a50) at Modules/websockets/WebSocketChannel.cpp:257
+257     Modules/websockets/WebSocketChannel.cpp: No such file or directory.
+(gdb) print handle
+$1 = (WebCore::SocketStreamHandle *) 0xdcc0a50
+(gdb) print m_handle
+$2 = {m_ptr = 0x0}
+```
