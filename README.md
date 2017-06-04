@@ -116,7 +116,7 @@ lack of support for nonblocking `connect()` calls on WSL][wsl-nonblock]
 The presence of `pselect()` calls in the successful, native Ubuntu strace logs
 was a hint: [nonblocking `connect()` calls typically return `EINPROGRESS`, after
 which clients should use `select()` (or `pselect()`) to wait for the socket to
-be writable][EINPROGRESS]:
+be writable][EINPROGRESS].
 
 [wsl-nonblock]: https://github.com/Microsoft/BashOnWindows/issues/1584#issuecomment-271915483
 [EINPROGRESS]: https://stackoverflow.com/questions/8277970/what-are-possible-reason-for-socket-error-einprogress-in-solaris
@@ -186,9 +186,10 @@ to `WebCore::WebSocket::create`, which results in a call to
 ```
 
 The paths to QT source files that follow are relative to the root of the
-PhantomJS repo at tag `2.1.1` after running `python ./build.py -d`. The critical
-point of each stack trace is this block from `QAbstractSocket::connectToHost`
-around line 1652:
+PhantomJS repo at tag `2.1.1` after running `python ./build.py -d`. The common
+starting point for each stack trace is this line from
+`QAbstractSocket::connectToHost` at
+`src/qt/qtbase/src/network/socket/qabstractsocket.cpp:1652`:
 
 ```c++
         d->_q_startConnecting(info);
