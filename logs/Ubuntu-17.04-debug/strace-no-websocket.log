@@ -1,0 +1,65 @@
+write(6, "\1\0\0\0\0\0\0\0", 8)         = 8
+pselect6(4, [3], [], [], {0, 0}, {NULL, 8}) = 1 (in [3], left {0, 0})
+read(3, "\1\0\0\0\0\0\0\0", 8)          = 8
+futex(0x55685492bec4, FUTEX_CMP_REQUEUE_PRIVATE, 1, 2147483647, 0x55685492be98, 10) = 5
+futex(0x55685492be98, FUTEX_WAKE_PRIVATE, 1) = 1
+futex(0x55685492bda0, FUTEX_WAKE_PRIVATE, 1) = 0
+futex(0x55685492bdcc, FUTEX_CMP_REQUEUE_PRIVATE, 1, 2147483647, 0x55685492bda0, 26) = 5
+futex(0x55685492bda0, FUTEX_WAKE_PRIVATE, 1) = 1
+futex(0x55685492bdcc, FUTEX_CMP_REQUEUE_PRIVATE, 1, 2147483647, 0x55685492bda0, 36) = 5
+futex(0x55685492bda0, FUTEX_WAKE_PRIVATE, 1) = 1
+futex(0x55685492bda0, FUTEX_WAKE_PRIVATE, 1) = 1
+futex(0x55685492bdcc, FUTEX_WAIT_PRIVATE, 42, NULL) = -1 EAGAIN (Resource temporarily unavailable)
+futex(0x55685492bda0, FUTEX_WAKE_PRIVATE, 1) = 0
+futex(0x55685492bdcc, FUTEX_CMP_REQUEUE_PRIVATE, 1, 2147483647, 0x55685492bda0, 58) = 5
+futex(0x55685492bda0, FUTEX_WAKE_PRIVATE, 1) = 1
+futex(0x55685492bdcc, FUTEX_CMP_REQUEUE_PRIVATE, 1, 2147483647, 0x55685492bda0, 68) = 5
+futex(0x55685492bda0, FUTEX_WAKE_PRIVATE, 1) = 1
+futex(0x55685492bec4, FUTEX_CMP_REQUEUE_PRIVATE, 1, 2147483647, 0x55685492be98, 16) = 3
+futex(0x55685492be98, FUTEX_WAKE_PRIVATE, 1) = 1
+futex(0x55685492bef4, FUTEX_WAIT_PRIVATE, 3, NULL) = -1 EAGAIN (Resource temporarily unavailable)
+futex(0x55685492be98, FUTEX_WAKE_PRIVATE, 1[Sun Jun 04 2017 11:33:46 GMT-0400 (EDT)] "GET /" "Mozilla/5.0 (Unknown; Linux x86_64) AppleWebKit/538.1 (KHTML, like Gecko) PhantomJS/2.1.1 Safari/538.1"
+) = 0
+futex(0x55685492339c, FUTEX_WAKE_OP_PRIVATE, 1, 1, 0x556854923398, {FUTEX_OP_SET, 0, FUTEX_OP_CMP_GT, 1}) = 1
+futex(0x556854923370, FUTEX_WAKE_PRIVATE, 1) = 1
+pselect6(4, [3], [], [], {0, 88000000}, {NULL, 8}) = 1 (in [3], left {0, 72258837})
+read(3, "\1\0\0\0\0\0\0\0", 8)          = 8
+write(3, "\1\0\0\0\0\0\0\0", 8)         = 8
+fcntl(8, F_SETFD, FD_CLOEXEC)           = 0
+read(8, "<?xml version=\"1.0\" encoding=\"ut"..., 16384) = 2818
+read(8, "", 13566)                      = 0
+close(8)                                = 0
+fcntl(8, F_SETFD, FD_CLOEXEC)           = 0
+read(8, "<?xml version=\"1.0\" encoding=\"ut"..., 16384) = 2818
+read(8, "", 13566)                      = 0
+close(8)                                = 0
+pselect6(4, [3], [], [], {0, 0}, {NULL, 8}) = 1 (in [3], left {0, 0})
+read(3, "\1\0\0\0\0\0\0\0", 8)          = 8
+write(3, "\1\0\0\0\0\0\0\0", 8)         = 8
+write(1, "STATUS: success\n", 16STATUS: success
+)       = 16
+write(1, "<!DOCTYPE html><html><head>\n  </"..., 66<!DOCTYPE html><html><head>
+  </head>
+  <body>
+  
+
+</body></html>
+) = 66
+mprotect(0x7f558c8f8000, 4096, PROT_READ|PROT_WRITE|PROT_EXEC) = 0
+madvise(0x7f558c8f8000, 4096, MADV_WILLNEED) = 0
+mprotect(0x7f558c8f9000, 4096, PROT_READ|PROT_WRITE|PROT_EXEC) = 0
+madvise(0x7f558c8f9000, 4096, MADV_WILLNEED) = 0
+write(6, "\1\0\0\0\0\0\0\0", 8)         = 8
+futex(0x5568549ed5a0, FUTEX_WAKE_PRIVATE, 1) = 1
+futex(0x5568549ed60c, FUTEX_WAIT_BITSET_PRIVATE, 1, {16200, 393511467}, ffffffff) = -1 EAGAIN (Resource temporarily unavailable)
+futex(0x5568549ed5e0, FUTEX_WAKE_PRIVATE, 1) = 0
+write(4, "\1\0\0\0\0\0\0\0", 8)         = 8
+munmap(0x7f55d1fbc000, 266240)          = 0
+close(3)                                = 0
+close(5)                                = 0
+munmap(0x7f55d1f3a000, 132792)          = 0
+write(2, "LEAK: 16 WebCoreNode\n", 21LEAK: 16 WebCoreNode
+)  = 21
+exit_group(0)                           = ?
++++ exited with 0 +++
+http-server stopped.
