@@ -167,3 +167,74 @@ write(1, "<!DOCTYPE html><html><head>\n  </"..., 1247<!DOCTYPE html><html><head>
 
 You can edit and re-run `collect-logs` or run `./run-demo --strace` directly to
 generate the complete strace output.
+
+### GDB logs
+
+GDB logs from a debug build of the PhantomJS 2.1.1 binary are in the `gdb/`
+directory. `gdb/stack-trace.txt` shows that the crash is definitely
+WebSocket-related, but the crash now happens due to a failing `ASSERT`,
+ostensibly because of a null pointer reference:
+
+```
+ASSERTION FAILED: handle == m_handle
+Modules/websockets/WebSocketChannel.cpp(257) : virtual void WebCore::WebSocketChannel::didOpenSocketStream(WebCore::SocketStreamHandle*)
+...snip...
+
+Thread 1 "phantomjs" received signal SIGSEGV, Segmentation fault.
+0x000000000a1edf70 in WTFCrash () at wtf/Assertions.cpp:345
+345     wtf/Assertions.cpp: No such file or directory.
+
+(gdb) where
+#0  0x000000000a1edf70 in WTFCrash () at wtf/Assertions.cpp:345#1  0x000000000907f702 in WebCore::WebSocketChannel::didOpenSocketStream (this=0xdd396b0, handle=0xdd2dcb0) at Modules/websockets/WebSocketChannel.cpp:257
+#2  0x0000000009098158 in WebCore::SocketStreamHandlePrivate::socketConnected (this=0xdd2dd50) at platform/network/qt/SocketStreamHandleQt.cpp:107
+...snip...
+
+(gdb) up
+#1  0x000000000907f702 in WebCore::WebSocketChannel::didOpenSocketStream (this=0xdce4b90, handle=0xdcc0a50) at Modules/websockets/WebSocketChannel.cpp:257
+257     Modules/websockets/WebSocketChannel.cpp: No such file or directory.
+(gdb) print handle
+$1 = (WebCore::SocketStreamHandle *) 0xdcc0a50
+(gdb) print m_handle
+$2 = {m_ptr = 0x0}
+```
+
+`gdb/connect.txt` shows the location of the `connect()` calls leading up to
+the crash. The first specifies `QAbstractSocket::IPv4Protocol`:
+```
+#0  connect () at ../sysdeps/unix/syscall-template.S:84
+#1  0x000000000a6bdebd in qt_safe_connect (sockfd=7, addr=0x7fffb631f380, addrlen=16)
+    at ../../include/QtNetwork/5.5.1/QtNetwork/private/../../../../../src/network/socket/qnet_unix_p.h:141
+#2  0x000000000a6be856 in QNativeSocketEnginePrivate::nativeConnect (this=0x7fffa00048c0, addr=..., port=8080) at socket/qnativesocketengine_unix.cpp:389
+#3  0x000000000a6bb68a in QNativeSocketEngine::connectToHost (this=0x7fffa00047c0, address=..., port=8080) at socket/qnativesocketengine.cpp:541
+#4  0x000000000a6b1167 in QAbstractSocketPrivate::_q_connectToNextAddress (this=0x7fffa0003970) at socket/qabstractsocket.cpp:1130
+#5  0x000000000a6b0ef9 in QAbstractSocketPrivate::_q_startConnecting (this=0x7fffa0003970, hostInfo=...) at socket/qabstractsocket.cpp:1067
+#6  0x000000000a6b2711 in QAbstractSocket::connectToHost (this=0x7fffa00032c0, hostName=..., port=8080, openMode=..., protocol=QAbstractSocket::IPv4Protocol)
+    at socket/qabstractsocket.cpp:1652
+#7  0x000000000a7008a2 in QHttpNetworkConnectionChannel::ensureConnection (this=0x7fffa00017c8) at access/qhttpnetworkconnectionchannel.cpp:354
+```
+
+the second, `QAbstractSocket::AnyIPProtocol`:
+```
+#0  connect () at ../sysdeps/unix/syscall-template.S:84
+#1  0x000000000a6bdebd in qt_safe_connect (sockfd=8, addr=0x7ffffffdb350, addrlen=16)
+    at ../../include/QtNetwork/5.5.1/QtNetwork/private/../../../../../src/network/socket/qnet_unix_p.h:141
+#2  0x000000000a6be856 in QNativeSocketEnginePrivate::nativeConnect (this=0xdcc6310, addr=..., port=8080) at socket/qnativesocketengine_unix.cpp:389
+#3  0x000000000a6bb68a in QNativeSocketEngine::connectToHost (this=0xdd215b0, address=..., port=8080) at socket/qnativesocketengine.cpp:541
+#4  0x000000000a6b1167 in QAbstractSocketPrivate::_q_connectToNextAddress (this=0xdd3e490) at socket/qabstractsocket.cpp:1130
+#5  0x000000000a6b0ef9 in QAbstractSocketPrivate::_q_startConnecting (this=0xdd3e490, hostInfo=...) at socket/qabstractsocket.cpp:1067
+#6  0x000000000a6b2711 in QAbstractSocket::connectToHost (this=0xdd3cb40, hostName=..., port=8080, openMode=..., protocol=QAbstractSocket::AnyIPProtocol)
+    at socket/qabstractsocket.cpp:1652
+#7  0x0000000009097aa6 in WebCore::SocketStreamHandlePrivate::SocketStreamHandlePrivate (this=0xdd29ba0, streamHandle=0xdd29b00, url=...)
+    at platform/network/qt/SocketStreamHandleQt.cpp:70
+#8  0x0000000009098cc1 in WebCore::SocketStreamHandle::SocketStreamHandle (this=0xdd29b00, url=..., client=0xdd452b0)
+    at platform/network/qt/SocketStreamHandleQt.cpp:190
+#9  0x000000000907e2c0 in WebCore::SocketStreamHandle::create (url=..., client=0xdd452b0) at platform/network/qt/SocketStreamHandle.h:58
+#10 0x000000000907e91c in WebCore::WebSocketChannel::connect (this=0xdd452b0, url=..., protocol=...) at Modules/websockets/WebSocketChannel.cpp:114
+#11 0x000000000907b899 in WebCore::WebSocket::connect (this=0xdd44f60, url=..., protocols=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:289
+#12 0x000000000907abf7 in WebCore::WebSocket::create (context=0xdcc3830, url=..., protocols=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:186
+#13 0x000000000907aaba in WebCore::WebSocket::create (context=0xdcc3830, url=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:173
+```
+
+`gdb/pselect.txt` shows that the program makes use of the `pselect()` system
+call, which may or may not be related to the issue, via `qt_safe_select` in
+`qt/qtbase/src/corelib/kernel/qcore_unix.cpp`.

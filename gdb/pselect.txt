@@ -1,0 +1,38 @@
+$ gdb ./phantomjs
+GNU gdb (Ubuntu 7.11.1-0ubuntu1~16.04) 7.11.1
+...snip...
+Reading symbols from ./phantomjs...done.
+(gdb) set args /.../wsl-websocket-crash-demo/visit-site.js
+(gdb) break pselect
+Function "pselect" not defined.
+Make breakpoint pending on future shared library load? (y or [n]) y
+Breakpoint 1 (pselect) pending.
+
+(gdb) r
+Starting program: /.../wsl-websocket-crash-demo/phantomjs /.../wsl-websocket-crash-demo/visit-site.js
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffb82b0700 (LWP 24724)]
+[New Thread 0x7fffb7aa0700 (LWP 24725)]
+[Switching to Thread 0x7fffb82b0700 (LWP 24724)]
+
+Thread 2 "Qt bearer threa" hit Breakpoint 1, __pselect (nfds=5, readfds=0x7fffb0000a78, writefds=0x7fffb0000d08, exceptfds=0x7fffb0000f98,
+    timeout=0x7fffb82afb20, sigmask=0x0) at ../sysdeps/unix/sysv/linux/pselect.c:39
+39      ../sysdeps/unix/sysv/linux/pselect.c: No such file or directory.
+
+(gdb) where
+#0  __pselect (nfds=5, readfds=0x7fffb0000a78, writefds=0x7fffb0000d08, exceptfds=0x7fffb0000f98, timeout=0x7fffb82afb20, sigmask=0x0)
+    at ../sysdeps/unix/sysv/linux/pselect.c:39
+#1  0x000000000a96e586 in qt_safe_select (nfds=5, fdread=0x7fffb0000a78, fdwrite=0x7fffb0000d08, fdexcept=0x7fffb0000f98, orig_timeout=0x7fffb82afd30)
+    at kernel/qcore_unix.cpp:86
+#2  0x000000000a96f9ac in QEventDispatcherUNIX::select (this=0x7fffb00008c0, nfds=5, readfds=0x7fffb0000a78, writefds=0x7fffb0000d08, exceptfds=0x7fffb0000f98,
+    timeout=0x7fffb82afd30) at kernel/qeventdispatcher_unix.cpp:320
+#3  0x000000000a96f17c in QEventDispatcherUNIXPrivate::doSelect (this=0x7fffb00008e0, flags=..., timeout=0x7fffb82afd30) at kernel/qeventdispatcher_unix.cpp:196
+#4  0x000000000a970cd6 in QEventDispatcherUNIX::processEvents (this=0x7fffb00008c0, flags=...) at kernel/qeventdispatcher_unix.cpp:607
+#5  0x000000000a90a70a in QEventLoop::processEvents (this=0x7fffb82afe50, flags=...) at kernel/qeventloop.cpp:128
+#6  0x000000000a90aa39 in QEventLoop::exec (this=0x7fffb82afe50, flags=...) at kernel/qeventloop.cpp:204
+#7  0x000000000a7330f5 in QThread::exec (this=0xdc42d80) at thread/qthread.cpp:503
+#8  0x000000000a7332ce in QThread::run (this=0xdc42d80) at thread/qthread.cpp:570
+#9  0x000000000a73ae14 in QThreadPrivate::start (arg=0xdc42d80) at thread/qthread_unix.cpp:331
+#10 0x00007ffffced76ba in start_thread (arg=0x7fffb82b0700) at pthread_create.c:333
+#11 0x00007ffffc34682d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109

@@ -1,0 +1,425 @@
+$ ./run-demo --no-ws
+Starting up http-server, serving .
+Available on:
+  http://127.0.0.1:8080
+Hit CTRL-C to stop the server
+Running PhantomJS as: ./phantomjs .../wsl-websocket-crash-demo/visit-site.js
+[Sun Jun 04 2017 08:15:08 GMT-0400 (DST)] "GET /" "Mozilla/5.0 (Unknown; Linux x86_64) AppleWebKit/538.1 (KHTML, like Gecko) PhantomJS/2.1.1 Safari/538.1"
+STATUS: success
+<!DOCTYPE html><html><head>
+  </head>
+  <body>
+
+
+</body></html>
+LEAK: 16 WebCoreNode
+http-server stopped.
+
+$ ./run-demo
+Serving "." at http://127.0.0.1:8080
+Running PhantomJS as: ./phantomjs .../wsl-websocket-crash-demo/visit-site.js
+ASSERTION FAILED: handle == m_handle
+Modules/websockets/WebSocketChannel.cpp(257) : virtual void WebCore::WebSocketChannel::didOpenSocketStream(WebCore::SocketStreamHandle*)
+1   0x7f7274fedf6b ./phantomjs(+0x21edf6b) [0x7f7274fedf6b]
+2   0x7f7273e7f702 ./phantomjs(+0x107f702) [0x7f7273e7f702]
+3   0x7f7273e98158 ./phantomjs(+0x1098158) [0x7f7273e98158]
+4   0x7f7273e9931d ./phantomjs(+0x109931d) [0x7f7273e9931d]
+5   0x7f727574484e ./phantomjs(+0x294484e) [0x7f727574484e]
+6   0x7f727574403e ./phantomjs(+0x294403e) [0x7f727574403e]
+7   0x7f72754b5b23 ./phantomjs(+0x26b5b23) [0x7f72754b5b23]
+8   0x7f72754b1a10 ./phantomjs(+0x26b1a10) [0x7f72754b1a10]
+9   0x7f72754b1177 ./phantomjs(+0x26b1177) [0x7f72754b1177]
+10  0x7f72754b0ef9 ./phantomjs(+0x26b0ef9) [0x7f72754b0ef9]
+11  0x7f72754b2711 ./phantomjs(+0x26b2711) [0x7f72754b2711]
+12  0x7f7273e97aa6 ./phantomjs(+0x1097aa6) [0x7f7273e97aa6]
+13  0x7f7273e98cc1 ./phantomjs(+0x1098cc1) [0x7f7273e98cc1]
+14  0x7f7273e7e2c0 ./phantomjs(+0x107e2c0) [0x7f7273e7e2c0]
+15  0x7f7273e7e91c ./phantomjs(+0x107e91c) [0x7f7273e7e91c]
+16  0x7f7273e7b899 ./phantomjs(+0x107b899) [0x7f7273e7b899]
+17  0x7f7273e7abf7 ./phantomjs(+0x107abf7) [0x7f7273e7abf7]
+18  0x7f7273e7aaba ./phantomjs(+0x107aaba) [0x7f7273e7aaba]
+19  0x7f7273f1eaf0 ./phantomjs(+0x111eaf0) [0x7f7273f1eaf0]
+20  0x7f7273f1f2a6 ./phantomjs(+0x111f2a6) [0x7f7273f1f2a6]
+21  0x7f7274e9b034 ./phantomjs(+0x209b034) [0x7f7274e9b034]
+22  0x7f7274e9d66a ./phantomjs(+0x209d66a) [0x7f7274e9d66a]
+23  0x7f7274e9daf3 ./phantomjs(+0x209daf3) [0x7f7274e9daf3]
+24  0x7f7274e9b24d ./phantomjs(+0x209b24d) [0x7f7274e9b24d]
+25  0x7f727737da9a ./phantomjs(+0x457da9a) [0x7f727737da9a]
+PhantomJS has crashed. Please read the bug reporting guide at
+<http://phantomjs.org/bug-reporting.html> and file a bug report.
+./run-demo: line 79: 23325 Segmentation fault      (core dumped) "${PHANTOMJS_CMD[@]}"
+
+
+$ gdb ./phantomjs
+GNU gdb (Ubuntu 7.11.1-0ubuntu1~16.04) 7.11.1
+...snip...
+Reading symbols from ./phantomjs...done.
+
+(gdb) set args /.../wsl-websocket-crash-demo/visit-site.js
+(gdb) break getsockopt
+Function "getsockopt" not defined.
+Make breakpoint pending on future shared library load? (y or [n]) y
+Breakpoint 1 (getsockopt) pending.
+
+(gdb) r
+Starting program: /.../wsl-websocket-crash-demo/phantomjs /.../wsl-websocket-crash-demo/visit-site.js
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffb82b0700 (LWP 24714)]
+[New Thread 0x7fffb7aa0700 (LWP 24715)]
+[New Thread 0x7fffb7290700 (LWP 24716)]
+[New Thread 0x7fffb6320700 (LWP 24717)]
+[Switching to Thread 0x7fffb6320700 (LWP 24717)]
+
+Thread 5 "Qt HTTP thread" hit Breakpoint 1, getsockopt () at ../sysdeps/unix/syscall-template.S:84
+84      ../sysdeps/unix/syscall-template.S: No such file or directory.
+
+(gdb) where
+#0  getsockopt () at ../sysdeps/unix/syscall-template.S:84
+#1  0x000000000a6bfffb in QNativeSocketEnginePrivate::fetchConnectionParameters (this=0x7fffa00048c0) at socket/qnativesocketengine_unix.cpp:987
+#2  0x000000000a6bb6ab in QNativeSocketEngine::connectToHost (this=0x7fffa00047c0, address=..., port=8080) at socket/qnativesocketengine.cpp:543
+#3  0x000000000a6b1167 in QAbstractSocketPrivate::_q_connectToNextAddress (this=0x7fffa0003970) at socket/qabstractsocket.cpp:1130
+#4  0x000000000a6b0ef9 in QAbstractSocketPrivate::_q_startConnecting (this=0x7fffa0003970, hostInfo=...) at socket/qabstractsocket.cpp:1067
+#5  0x000000000a6b2711 in QAbstractSocket::connectToHost (this=0x7fffa00032c0, hostName=..., port=8080, openMode=..., protocol=QAbstractSocket::IPv4Protocol)
+    at socket/qabstractsocket.cpp:1652
+#6  0x000000000a7008a2 in QHttpNetworkConnectionChannel::ensureConnection (this=0x7fffa00017c8) at access/qhttpnetworkconnectionchannel.cpp:354
+#7  0x000000000a6fb988 in QHttpNetworkConnectionPrivate::_q_startNextRequest (this=0x7fffa0001640) at access/qhttpnetworkconnection.cpp:1013
+#8  0x000000000a6fd5be in QHttpNetworkConnection::qt_static_metacall (_o=0x7fffa00015c0, _c=QMetaObject::InvokeMetaMethod, _id=0, _a=0x7fffa0003170)
+    at .moc/moc_qhttpnetworkconnection_p.cpp:78
+#9  0x000000000a93c957 in QMetaCallEvent::placeMetaCall (this=0x7fffa00031b0, object=0x7fffa00015c0) at kernel/qobject.cpp:486
+#10 0x000000000a93dab3 in QObject::event (this=0x7fffa00015c0, e=0x7fffa00031b0) at kernel/qobject.cpp:1239
+#11 0x00000000085985fe in QApplicationPrivate::notify_helper (this=0xd98a6e0, receiver=0x7fffa00015c0, e=0x7fffa00031b0) at kernel/qapplication.cpp:3716
+#12 0x0000000008595d63 in QApplication::notify (this=0x7ffffffddfa0, receiver=0x7fffa00015c0, e=0x7fffa00031b0) at kernel/qapplication.cpp:3160
+#13 0x000000000a90dc89 in QCoreApplication::notifyInternal (this=0x7ffffffddfa0, receiver=0x7fffa00015c0, event=0x7fffa00031b0)
+    at kernel/qcoreapplication.cpp:965
+#14 0x0000000008559015 in QCoreApplication::sendEvent (receiver=0x7fffa00015c0, event=0x7fffa00031b0)
+    at /mnt/src/ariya/phantomjs/src/qt/qtbase/include/QtCore/../../src/corelib/kernel/qcoreapplication.h:224
+#15 0x000000000a90f089 in QCoreApplicationPrivate::sendPostedEvents (receiver=0x0, event_type=0, data=0xdc9f770) at kernel/qcoreapplication.cpp:1593
+#16 0x000000000a970b8c in QEventDispatcherUNIX::processEvents (this=0x7fffa00008c0, flags=...) at kernel/qeventdispatcher_unix.cpp:579
+#17 0x000000000a90a70a in QEventLoop::processEvents (this=0x7fffb631fe50, flags=...) at kernel/qeventloop.cpp:128
+#18 0x000000000a90aa39 in QEventLoop::exec (this=0x7fffb631fe50, flags=...) at kernel/qeventloop.cpp:204
+#19 0x000000000a7330f5 in QThread::exec (this=0xdd36c10) at thread/qthread.cpp:503
+#20 0x000000000a7332ce in QThread::run (this=0xdd36c10) at thread/qthread.cpp:570
+#21 0x000000000a73ae14 in QThreadPrivate::start (arg=0xdd36c10) at thread/qthread_unix.cpp:331
+#22 0x00007ffffced76ba in start_thread (arg=0x7fffb6320700) at pthread_create.c:333
+#23 0x00007ffffc34682d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
+
+(gdb) c                                                                                                                                                    [7/75]
+Continuing.
+[Switching to Thread 0x7fffff710740 (LWP 24710)]
+
+Thread 1 "phantomjs" hit Breakpoint 1, getsockopt () at ../sysdeps/unix/syscall-template.S:84
+84      in ../sysdeps/unix/syscall-template.S
+(gdb) where
+#0  getsockopt () at ../sysdeps/unix/syscall-template.S:84
+#1  0x000000000a6bfffb in QNativeSocketEnginePrivate::fetchConnectionParameters (this=0xdd3acf0) at socket/qnativesocketengine_unix.cpp:987
+#2  0x000000000a6bb6ab in QNativeSocketEngine::connectToHost (this=0xdd2de00, address=..., port=8080) at socket/qnativesocketengine.cpp:543
+#3  0x000000000a6b1167 in QAbstractSocketPrivate::_q_connectToNextAddress (this=0xdcb9720) at socket/qabstractsocket.cpp:1130
+#4  0x000000000a6b0ef9 in QAbstractSocketPrivate::_q_startConnecting (this=0xdcb9720, hostInfo=...) at socket/qabstractsocket.cpp:1067
+#5  0x000000000a6b2711 in QAbstractSocket::connectToHost (this=0xdce5270, hostName=..., port=8080, openMode=..., protocol=QAbstractSocket::AnyIPProtocol)
+    at socket/qabstractsocket.cpp:1652
+#6  0x0000000009097aa6 in WebCore::SocketStreamHandlePrivate::SocketStreamHandlePrivate (this=0xdd2dd50, streamHandle=0xdd2dcb0, url=...)
+    at platform/network/qt/SocketStreamHandleQt.cpp:70
+#7  0x0000000009098cc1 in WebCore::SocketStreamHandle::SocketStreamHandle (this=0xdd2dcb0, url=..., client=0xdd396b0)
+    at platform/network/qt/SocketStreamHandleQt.cpp:190
+#8  0x000000000907e2c0 in WebCore::SocketStreamHandle::create (url=..., client=0xdd396b0) at platform/network/qt/SocketStreamHandle.h:58
+#9  0x000000000907e91c in WebCore::WebSocketChannel::connect (this=0xdd396b0, url=..., protocol=...) at Modules/websockets/WebSocketChannel.cpp:114
+#10 0x000000000907b899 in WebCore::WebSocket::connect (this=0xdd20ae0, url=..., protocols=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:289
+#11 0x000000000907abf7 in WebCore::WebSocket::create (context=0xdcc3610, url=..., protocols=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:186
+#12 0x000000000907aaba in WebCore::WebSocket::create (context=0xdcc3610, url=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:173
+#13 0x000000000911eaf0 in WebCore::JSWebSocketConstructor::constructJSWebSocket1 (exec=0x7fffb6690110) at generated/JSWebSocket.cpp:96
+#14 0x000000000911f2a6 in WebCore::JSWebSocketConstructor::constructJSWebSocket (exec=0x7fffb6690110) at generated/JSWebSocket.cpp:154
+#15 0x000000000a09b034 in JSC::LLInt::handleHostCall (execCallee=0x7fffb6690110, pc=0xdd28ac0, callee=..., kind=JSC::CodeForConstruct)
+    at llint/LLIntSlowPaths.cpp:1357
+#16 0x000000000a09d66a in JSC::LLInt::setUpCall (execCallee=0x7fffb6690110, pc=0xdd28ac0, kind=JSC::CodeForConstruct, calleeAsValue=..., callLinkInfo=0xdcffe30)
+    at llint/LLIntSlowPaths.cpp:1378
+#17 0x000000000a09daf3 in JSC::LLInt::genericCall (exec=0x7fffb66900a0, pc=0xdd28ac0, kind=JSC::CodeForConstruct) at llint/LLIntSlowPaths.cpp:1434
+#18 0x000000000a09b24d in JSC::LLInt::llint_slow_path_construct (exec=0x7fffb66900a0, pc=0xdd28ac0) at llint/LLIntSlowPaths.cpp:1446
+#19 0x000000000c57da9a in llint_op_construct ()
+#20 0x00007fffb6690058 in ?? ()
+#21 0x000000000dc23550 in ?? ()
+#22 0x00007ffffffdbc30 in ?? ()
+#23 0x000000000a04cbd3 in JSC::JSStack::installTrapsAfterFrame (this=0x0, frame=0x0) at interpreter/JSStackInlines.h:212
+#24 0x000000000a04bb37 in JSC::JITCode::execute (this=0x7fffb64df990, stack=0xdc23550, callFrame=0x7fffb6690058, vm=0xdc666f0) at jit/JITCode.h:135
+#25 0x000000000a0492f6 in JSC::Interpreter::execute (this=0xdc23540, program=0x7fffb64df970, callFrame=0x7fffb663f4d8, thisObj=0x7fffb667ff88)
+    at interpreter/Interpreter.cpp:951
+#26 0x000000000a125628 in JSC::evaluate (exec=0x7fffb663f4d8, source=..., thisValue=..., returnedException=0x7ffffffdc878) at runtime/Completion.cpp:83
+#27 0x00000000089a350e in WebCore::JSMainThreadExecState::evaluate (exec=0x7fffb663f4d8, source=..., thisValue=..., exception=0x7ffffffdc878)
+    at bindings/js/JSMainThreadExecState.h:77
+#28 0x00000000089a3ca9 in WebCore::ScriptController::evaluateInWorld (this=0xdd12a10, sourceCode=..., world=0xdc56770) at bindings/js/ScriptController.cpp:142
+#29 0x00000000089a3dbf in WebCore::ScriptController::evaluate (this=0xdd12a10, sourceCode=...) at bindings/js/ScriptController.cpp:158
+#30 0x0000000009d0ddc9 in WebCore::ScriptElement::executeScript (this=0xdce6538, sourceCode=...) at dom/ScriptElement.cpp:316
+#31 0x0000000009d0d54d in WebCore::ScriptElement::prepareScript (this=0xdce6538, scriptStartPosition=...,
+    supportLegacyTypes=WebCore::ScriptElement::DisallowLegacyTypeInTypeAttribute) at dom/ScriptElement.cpp:245
+#32 0x0000000008b10e6a in WebCore::HTMLScriptRunner::runScript (this=0xdca92e0, script=0xdce64d0, scriptStartPosition=...)
+    at html/parser/HTMLScriptRunner.cpp:312
+#33 0x0000000008b1053c in WebCore::HTMLScriptRunner::execute (this=0xdca92e0, scriptElement=..., scriptStartPosition=...)
+    at html/parser/HTMLScriptRunner.cpp:181
+#34 0x0000000008afd7c1 in WebCore::HTMLDocumentParser::runScriptsForPausedTreeBuilder (this=0xdd14d70) at html/parser/HTMLDocumentParser.cpp:271
+#35 0x0000000008afd8c3 in WebCore::HTMLDocumentParser::canTakeNextToken (this=0xdd14d70, mode=WebCore::HTMLDocumentParser::AllowYield, session=...)
+    at html/parser/HTMLDocumentParser.cpp:290
+#36 0x0000000008afdc64 in WebCore::HTMLDocumentParser::pumpTokenizer (this=0xdd14d70, mode=WebCore::HTMLDocumentParser::AllowYield)
+    at html/parser/HTMLDocumentParser.cpp:535
+#37 0x0000000008afd5f9 in WebCore::HTMLDocumentParser::pumpTokenizerIfPossible (this=0xdd14d70, mode=WebCore::HTMLDocumentParser::AllowYield)
+    at html/parser/HTMLDocumentParser.cpp:235
+#38 0x0000000008afe79c in WebCore::HTMLDocumentParser::append (this=0xdd14d70, inputSource=...) at html/parser/HTMLDocumentParser.cpp:740
+#39 0x0000000009cb7930 in WebCore::DecodedDataDocumentParser::appendBytes (this=0xdd14d70, writer=0xdcfba00,
+    data=0xdcdd080 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241) at dom/DecodedDataDocumentParser.cpp:50
+#40 0x0000000008b907f7 in WebCore::DocumentWriter::addData (this=0xdcfba00,
+    bytes=0xdcdd080 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![
+CDATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241) at loader/DocumentWriter.cpp:225
+#41 0x0000000008b8049b in WebCore::DocumentLoader::commitData (this=0xdcfb960,
+    bytes=0xdcdd080 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![
+CDATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241) at loader/DocumentLoader.cpp:803
+#42 0x0000000008947a26 in WebCore::FrameLoaderClientQt::committedLoad (this=0xdd122f0, loader=0xdcfb960,
+    data=0xdcdd080 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241) at qt/WebCoreSupport/FrameLoaderClientQt.cpp:879
+#43 0x0000000008b800b0 in WebCore::DocumentLoader::commitLoad (this=0xdcfb960,
+    data=0xdcdd080 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241) at loader/DocumentLoader.cpp:745
+#44 0x0000000008b806b3 in WebCore::DocumentLoader::dataReceived (this=0xdcfb960, resource=0xdd34370,
+    data=0xdcdd080 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241) at loader/DocumentLoader.cpp:850
+#45 0x0000000008b5dece in WebCore::CachedRawResource::notifyClientsDataWasReceived (this=0xdd34370,
+    data=0xdcdd080 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241) at loader/cache/CachedRawResource.cpp:110
+#46 0x0000000008b5dbf9 in WebCore::CachedRawResource::addDataBuffer (this=0xdd34370, data=0xdc44f00) at loader/cache/CachedRawResource.cpp:66
+#47 0x0000000008bd362a in WebCore::SubresourceLoader::didReceiveDataOrBuffer (this=0xdc9da70,
+    data=0xdd3d280 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241, prpBuffer=..., encodedDataLength=-1,
+    dataPayloadType=WebCore::DataPayloadBytes) at loader/SubresourceLoader.cpp:250
+#48 0x0000000008bd3380 in WebCore::SubresourceLoader::didReceiveData (this=0xdc9da70,
+    data=0xdd3d280 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241, encodedDataLength=-1, dataPayloadType=WebCore::DataPayloadBytes)
+    at loader/SubresourceLoader.cpp:226
+#49 0x0000000008bc92f8 in WebCore::ResourceLoader::didReceiveData (this=0xdc9da70,
+    data=0xdd3d280 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241, encodedDataLength=-1) at loader/ResourceLoader.cpp:475
+#50 0x0000000008eec442 in WebCore::QNetworkReplyHandler::forwardData (this=0xdc9e870) at platform/network/qt/QNetworkReplyHandler.cpp:704
+#51 0x0000000008ee992a in WebCore::QNetworkReplyHandlerCallQueue::flush (this=0xdc9e8a8) at platform/network/qt/QNetworkReplyHandler.cpp:267
+#52 0x0000000008ee969a in WebCore::QNetworkReplyHandlerCallQueue::unlock (this=0xdc9e8a8) at platform/network/qt/QNetworkReplyHandler.cpp:247
+#53 0x0000000008ee9985 in WebCore::QueueLocker::~QueueLocker (this=0x7ffffffdd368, __in_chrg=<optimized out>)
+    at platform/network/qt/QNetworkReplyHandler.cpp:275
+#54 0x0000000008eea52b in WebCore::QNetworkReplyWrapper::emitMetaDataChanged (this=0xdc9f320) at platform/network/qt/QNetworkReplyHandler.cpp:412
+#55 0x0000000008eea284 in WebCore::QNetworkReplyWrapper::receiveSniffedMIMEType (this=0xdc9f320) at platform/network/qt/QNetworkReplyHandler.cpp:376
+#56 0x0000000008eea136 in WebCore::QNetworkReplyWrapper::receiveMetaData (this=0xdc9f320) at platform/network/qt/QNetworkReplyHandler.cpp:362
+#57 0x0000000008eed204 in WebCore::QNetworkReplyWrapper::qt_static_metacall (_o=0xdc9f320, _c=QMetaObject::InvokeMetaMethod, _id=0, _a=0x7ffffffdd580)
+    at .moc/moc_QNetworkReplyHandler.cpp:178
+#58 0x000000000a94484e in QMetaObject::activate (sender=0xdd35e60, signalOffset=3, local_signal_index=0, argv=0x0) at kernel/qobject.cpp:3713
+#59 0x000000000a94403e in QMetaObject::activate (sender=0xdd35e60, m=0xd736e00 <QIODevice::staticMetaObject>, local_signal_index=0, argv=0x0)
+    at kernel/qobject.cpp:3578
+#60 0x000000000a9c5a49 in QIODevice::readyRead (this=0xdd35e60) at .moc/moc_qiodevice.cpp:155
+#61 0x000000000a66c2ba in QNetworkReplyHttpImplPrivate::replyDownloadProgressSlot (this=0xdd367f0, bytesReceived=1241, bytesTotal=1250)
+    at access/qnetworkreplyhttpimpl.cpp:1214
+#62 0x000000000a6e0a14 in QNetworkReplyHttpImpl::qt_static_metacall (_o=0xdd35e60, _c=QMetaObject::InvokeMetaMethod, _id=19, _a=0x7fffa0005080)
+    at .moc/moc_qnetworkreplyhttpimpl_p.cpp:246
+#63 0x000000000a93c957 in QMetaCallEvent::placeMetaCall (this=0x7fffa00050e0, object=0xdd35e60) at kernel/qobject.cpp:486
+#64 0x000000000a93dab3 in QObject::event (this=0xdd35e60, e=0x7fffa00050e0) at kernel/qobject.cpp:1239
+#65 0x00000000085985fe in QApplicationPrivate::notify_helper (this=0xd98a6e0, receiver=0xdd35e60, e=0x7fffa00050e0) at kernel/qapplication.cpp:3716
+#66 0x0000000008595d63 in QApplication::notify (this=0x7ffffffddfa0, receiver=0xdd35e60, e=0x7fffa00050e0) at kernel/qapplication.cpp:3160
+#67 0x000000000a90dc89 in QCoreApplication::notifyInternal (this=0x7ffffffddfa0, receiver=0xdd35e60, event=0x7fffa00050e0) at kernel/qcoreapplication.cpp:965
+#68 0x0000000008559015 in QCoreApplication::sendEvent (receiver=0xdd35e60, event=0x7fffa00050e0)
+    at /mnt/src/ariya/phantomjs/src/qt/qtbase/include/QtCore/../../src/corelib/kernel/qcoreapplication.h:224
+#69 0x000000000a90f089 in QCoreApplicationPrivate::sendPostedEvents (receiver=0x0, event_type=0, data=0xd98a830) at kernel/qcoreapplication.cpp:1593
+#70 0x000000000a970b8c in QEventDispatcherUNIX::processEvents (this=0xd98c4e0, flags=...) at kernel/qeventdispatcher_unix.cpp:579
+#71 0x000000000a258fa0 in QUnixEventDispatcherQPA::processEvents (this=0xd98c4e0, flags=...) at eventdispatchers/qunixeventdispatcher.cpp:62
+#72 0x000000000a90a70a in QEventLoop::processEvents (this=0x7ffffffdded0, flags=...) at kernel/qeventloop.cpp:128
+#73 0x000000000a90aa39 in QEventLoop::exec (this=0x7ffffffdded0, flags=...) at kernel/qeventloop.cpp:204
+#74 0x000000000a90e3fe in QCoreApplication::exec () at kernel/qcoreapplication.cpp:1229
+#75 0x000000000a277222 in QGuiApplication::exec () at kernel/qguiapplication.cpp:1527
+#76 0x0000000008595709 in QApplication::exec () at kernel/qapplication.cpp:2976
+#77 0x0000000008509b12 in inner_main (argc=2, argv=0x7ffffffde108) at main.cpp:67
+#78 0x0000000008509c3d in main (argc=2, argv=0x7ffffffde108) at main.cpp:81
+
+
+(gdb) c
+Continuing.
+ASSERTION FAILED: handle == m_handle
+Modules/websockets/WebSocketChannel.cpp(257) : virtual void WebCore::WebSocketChannel::didOpenSocketStream(WebCore::SocketStreamHandle*)
+1   0xa1edf6b /.../wsl-websocket-crash-demo/phantomjs(+0x21edf6b) [0xa1edf6b]
+2   0x907f702 /.../wsl-websocket-crash-demo/phantomjs(+0x107f702) [0x907f702]
+3   0x9098158 /.../wsl-websocket-crash-demo/phantomjs(+0x1098158) [0x9098158]
+4   0x909931d /.../wsl-websocket-crash-demo/phantomjs(+0x109931d) [0x909931d]
+5   0xa94484e /.../wsl-websocket-crash-demo/phantomjs(+0x294484e) [0xa94484e]
+6   0xa94403e /.../wsl-websocket-crash-demo/phantomjs(+0x294403e) [0xa94403e]
+7   0xa6b5b23 /.../wsl-websocket-crash-demo/phantomjs(+0x26b5b23) [0xa6b5b23]
+8   0xa6b1a10 /.../wsl-websocket-crash-demo/phantomjs(+0x26b1a10) [0xa6b1a10]
+9   0xa6b1177 /.../wsl-websocket-crash-demo/phantomjs(+0x26b1177) [0xa6b1177]
+10  0xa6b0ef9 /.../wsl-websocket-crash-demo/phantomjs(+0x26b0ef9) [0xa6b0ef9]
+11  0xa6b2711 /.../wsl-websocket-crash-demo/phantomjs(+0x26b2711) [0xa6b2711]
+12  0x9097aa6 /.../wsl-websocket-crash-demo/phantomjs(+0x1097aa6) [0x9097aa6]
+13  0x9098cc1 /.../wsl-websocket-crash-demo/phantomjs(+0x1098cc1) [0x9098cc1]
+14  0x907e2c0 /.../wsl-websocket-crash-demo/phantomjs(+0x107e2c0) [0x907e2c0]
+15  0x907e91c /.../wsl-websocket-crash-demo/phantomjs(+0x107e91c) [0x907e91c]
+16  0x907b899 /.../wsl-websocket-crash-demo/phantomjs(+0x107b899) [0x907b899]
+17  0x907abf7 /.../wsl-websocket-crash-demo/phantomjs(+0x107abf7) [0x907abf7]
+18  0x907aaba /.../wsl-websocket-crash-demo/phantomjs(+0x107aaba) [0x907aaba]
+19  0x911eaf0 /.../wsl-websocket-crash-demo/phantomjs(+0x111eaf0) [0x911eaf0]
+20  0x911f2a6 /.../wsl-websocket-crash-demo/phantomjs(+0x111f2a6) [0x911f2a6]
+21  0xa09b034 /.../wsl-websocket-crash-demo/phantomjs(+0x209b034) [0xa09b034]
+22  0xa09d66a /.../wsl-websocket-crash-demo/phantomjs(+0x209d66a) [0xa09d66a]
+23  0xa09daf3 /.../wsl-websocket-crash-demo/phantomjs(+0x209daf3) [0xa09daf3]
+24  0xa09b24d /.../wsl-websocket-crash-demo/phantomjs(+0x209b24d) [0xa09b24d]
+25  0xc57da9a /.../wsl-websocket-crash-demo/phantomjs(+0x457da9a) [0xc57da9a]
+
+Thread 1 "phantomjs" received signal SIGSEGV, Segmentation fault.
+0x000000000a1edf70 in WTFCrash () at wtf/Assertions.cpp:345
+345     wtf/Assertions.cpp: No such file or directory.
+
+(gdb) where
+#0  0x000000000a1edf70 in WTFCrash () at wtf/Assertions.cpp:345#1  0x000000000907f702 in WebCore::WebSocketChannel::didOpenSocketStream (this=0xdd396b0, handle=0xdd2dcb0) at Modules/websockets/WebSocketChannel.cpp:257
+#2  0x0000000009098158 in WebCore::SocketStreamHandlePrivate::socketConnected (this=0xdd2dd50) at platform/network/qt/SocketStreamHandleQt.cpp:107
+#3  0x000000000909931d in WebCore::SocketStreamHandlePrivate::qt_static_metacall (_o=0xdd2dd50, _c=QMetaObject::InvokeMetaMethod, _id=0, _a=0x7ffffffdb360)
+    at .moc/moc_SocketStreamHandlePrivate.cpp:108
+#4  0x000000000a94484e in QMetaObject::activate (sender=0xdce5270, signalOffset=7, local_signal_index=1, argv=0x0) at kernel/qobject.cpp:3713
+#5  0x000000000a94403e in QMetaObject::activate (sender=0xdce5270, m=0xd731240 <QAbstractSocket::staticMetaObject>, local_signal_index=1, argv=0x0)
+    at kernel/qobject.cpp:3578
+#6  0x000000000a6b5b23 in QAbstractSocket::connected (this=0xdce5270) at .moc/moc_qabstractsocket.cpp:367
+#7  0x000000000a6b1a10 in QAbstractSocketPrivate::fetchConnectionParameters (this=0xdcb9720) at socket/qabstractsocket.cpp:1321
+#8  0x000000000a6b1177 in QAbstractSocketPrivate::_q_connectToNextAddress (this=0xdcb9720) at socket/qabstractsocket.cpp:1132
+#9  0x000000000a6b0ef9 in QAbstractSocketPrivate::_q_startConnecting (this=0xdcb9720, hostInfo=...) at socket/qabstractsocket.cpp:1067
+#10 0x000000000a6b2711 in QAbstractSocket::connectToHost (this=0xdce5270, hostName=..., port=8080, openMode=..., protocol=QAbstractSocket::AnyIPProtocol)
+    at socket/qabstractsocket.cpp:1652
+#11 0x0000000009097aa6 in WebCore::SocketStreamHandlePrivate::SocketStreamHandlePrivate (this=0xdd2dd50, streamHandle=0xdd2dcb0, url=...)
+    at platform/network/qt/SocketStreamHandleQt.cpp:70
+#12 0x0000000009098cc1 in WebCore::SocketStreamHandle::SocketStreamHandle (this=0xdd2dcb0, url=..., client=0xdd396b0)
+    at platform/network/qt/SocketStreamHandleQt.cpp:190
+#13 0x000000000907e2c0 in WebCore::SocketStreamHandle::create (url=..., client=0xdd396b0) at platform/network/qt/SocketStreamHandle.h:58
+#14 0x000000000907e91c in WebCore::WebSocketChannel::connect (this=0xdd396b0, url=..., protocol=...) at Modules/websockets/WebSocketChannel.cpp:114
+#15 0x000000000907b899 in WebCore::WebSocket::connect (this=0xdd20ae0, url=..., protocols=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:289
+#16 0x000000000907abf7 in WebCore::WebSocket::create (context=0xdcc3610, url=..., protocols=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:186
+#17 0x000000000907aaba in WebCore::WebSocket::create (context=0xdcc3610, url=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:173
+#18 0x000000000911eaf0 in WebCore::JSWebSocketConstructor::constructJSWebSocket1 (exec=0x7fffb6690110) at generated/JSWebSocket.cpp:96
+#19 0x000000000911f2a6 in WebCore::JSWebSocketConstructor::constructJSWebSocket (exec=0x7fffb6690110) at generated/JSWebSocket.cpp:154
+#20 0x000000000a09b034 in JSC::LLInt::handleHostCall (execCallee=0x7fffb6690110, pc=0xdd28ac0, callee=..., kind=JSC::CodeForConstruct)
+    at llint/LLIntSlowPaths.cpp:1357
+#21 0x000000000a09d66a in JSC::LLInt::setUpCall (execCallee=0x7fffb6690110, pc=0xdd28ac0, kind=JSC::CodeForConstruct, calleeAsValue=..., callLinkInfo=0xdcffe30)
+    at llint/LLIntSlowPaths.cpp:1378
+#22 0x000000000a09daf3 in JSC::LLInt::genericCall (exec=0x7fffb66900a0, pc=0xdd28ac0, kind=JSC::CodeForConstruct) at llint/LLIntSlowPaths.cpp:1434
+#23 0x000000000a09b24d in JSC::LLInt::llint_slow_path_construct (exec=0x7fffb66900a0, pc=0xdd28ac0) at llint/LLIntSlowPaths.cpp:1446
+#24 0x000000000c57da9a in llint_op_construct ()
+#25 0x00007fffb6690058 in ?? ()
+#26 0x000000000dc23550 in ?? ()
+#27 0x00007ffffffdbc30 in ?? ()
+#28 0x000000000a04cbd3 in JSC::JSStack::installTrapsAfterFrame (this=0x0, frame=0x0) at interpreter/JSStackInlines.h:212
+#29 0x000000000a04bb37 in JSC::JITCode::execute (this=0x7fffb64df990, stack=0xdc23550, callFrame=0x7fffb6690058, vm=0xdc666f0) at jit/JITCode.h:135
+#30 0x000000000a0492f6 in JSC::Interpreter::execute (this=0xdc23540, program=0x7fffb64df970, callFrame=0x7fffb663f4d8, thisObj=0x7fffb667ff88)
+    at interpreter/Interpreter.cpp:951
+#31 0x000000000a125628 in JSC::evaluate (exec=0x7fffb663f4d8, source=..., thisValue=..., returnedException=0x7ffffffdc878) at runtime/Completion.cpp:83
+#32 0x00000000089a350e in WebCore::JSMainThreadExecState::evaluate (exec=0x7fffb663f4d8, source=..., thisValue=..., exception=0x7ffffffdc878)
+    at bindings/js/JSMainThreadExecState.h:77
+#33 0x00000000089a3ca9 in WebCore::ScriptController::evaluateInWorld (this=0xdd12a10, sourceCode=..., world=0xdc56770) at bindings/js/ScriptController.cpp:142
+#34 0x00000000089a3dbf in WebCore::ScriptController::evaluate (this=0xdd12a10, sourceCode=...) at bindings/js/ScriptController.cpp:158
+#35 0x0000000009d0ddc9 in WebCore::ScriptElement::executeScript (this=0xdce6538, sourceCode=...) at dom/ScriptElement.cpp:316
+#36 0x0000000009d0d54d in WebCore::ScriptElement::prepareScript (this=0xdce6538, scriptStartPosition=...,
+    supportLegacyTypes=WebCore::ScriptElement::DisallowLegacyTypeInTypeAttribute) at dom/ScriptElement.cpp:245
+#37 0x0000000008b10e6a in WebCore::HTMLScriptRunner::runScript (this=0xdca92e0, script=0xdce64d0, scriptStartPosition=...)
+    at html/parser/HTMLScriptRunner.cpp:312
+#38 0x0000000008b1053c in WebCore::HTMLScriptRunner::execute (this=0xdca92e0, scriptElement=..., scriptStartPosition=...)    at html/parser/HTMLScriptRunner.cpp:181
+#39 0x0000000008afd7c1 in WebCore::HTMLDocumentParser::runScriptsForPausedTreeBuilder (this=0xdd14d70) at html/parser/HTMLDocumentParser.cpp:271
+#40 0x0000000008afd8c3 in WebCore::HTMLDocumentParser::canTakeNextToken (this=0xdd14d70, mode=WebCore::HTMLDocumentParser::AllowYield, session=...)
+    at html/parser/HTMLDocumentParser.cpp:290
+#41 0x0000000008afdc64 in WebCore::HTMLDocumentParser::pumpTokenizer (this=0xdd14d70, mode=WebCore::HTMLDocumentParser::AllowYield)
+    at html/parser/HTMLDocumentParser.cpp:535
+#42 0x0000000008afd5f9 in WebCore::HTMLDocumentParser::pumpTokenizerIfPossible (this=0xdd14d70, mode=WebCore::HTMLDocumentParser::AllowYield)
+    at html/parser/HTMLDocumentParser.cpp:235
+#43 0x0000000008afe79c in WebCore::HTMLDocumentParser::append (this=0xdd14d70, inputSource=...) at html/parser/HTMLDocumentParser.cpp:740
+#44 0x0000000009cb7930 in WebCore::DecodedDataDocumentParser::appendBytes (this=0xdd14d70, writer=0xdcfba00,
+    data=0xdcdd080 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241) at dom/DecodedDataDocumentParser.cpp:50
+#45 0x0000000008b907f7 in WebCore::DocumentWriter::addData (this=0xdcfba00,
+    bytes=0xdcdd080 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![
+CDATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241) at loader/DocumentWriter.cpp:225
+#46 0x0000000008b8049b in WebCore::DocumentLoader::commitData (this=0xdcfb960,
+    bytes=0xdcdd080 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![
+CDATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241) at loader/DocumentLoader.cpp:803
+#47 0x0000000008947a26 in WebCore::FrameLoaderClientQt::committedLoad (this=0xdd122f0, loader=0xdcfb960,
+    data=0xdcdd080 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241) at qt/WebCoreSupport/FrameLoaderClientQt.cpp:879
+#48 0x0000000008b800b0 in WebCore::DocumentLoader::commitLoad (this=0xdcfb960,
+    data=0xdcdd080 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241) at loader/DocumentLoader.cpp:745
+#49 0x0000000008b806b3 in WebCore::DocumentLoader::dataReceived (this=0xdcfb960, resource=0xdd34370,
+    data=0xdcdd080 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241) at loader/DocumentLoader.cpp:850
+#50 0x0000000008b5dece in WebCore::CachedRawResource::notifyClientsDataWasReceived (this=0xdd34370,
+    data=0xdcdd080 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241) at loader/cache/CachedRawResource.cpp:110
+#51 0x0000000008b5dbf9 in WebCore::CachedRawResource::addDataBuffer (this=0xdd34370, data=0xdc44f00) at loader/cache/CachedRawResource.cpp:66
+#52 0x0000000008bd362a in WebCore::SubresourceLoader::didReceiveDataOrBuffer (this=0xdc9da70,
+    data=0xdd3d280 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241, prpBuffer=..., encodedDataLength=-1,
+    dataPayloadType=WebCore::DataPayloadBytes) at loader/SubresourceLoader.cpp:250
+#53 0x0000000008bd3380 in WebCore::SubresourceLoader::didReceiveData (this=0xdc9da70,
+    data=0xdd3d280 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241, encodedDataLength=-1, dataPayloadType=WebCore::DataPayloadBytes)
+    at loader/SubresourceLoader.cpp:226
+#54 0x0000000008bc92f8 in WebCore::ResourceLoader::didReceiveData (this=0xdc9da70,
+    data=0xdd3d280 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241, encodedDataLength=-1) at loader/ResourceLoader.cpp:475
+#55 0x0000000008eec442 in WebCore::QNetworkReplyHandler::forwardData (this=0xdc9e870) at platform/network/qt/QNetworkReplyHandler.cpp:704
+#56 0x0000000008ee992a in WebCore::QNetworkReplyHandlerCallQueue::flush (this=0xdc9e8a8) at platform/network/qt/QNetworkReplyHandler.cpp:267
+#57 0x0000000008ee969a in WebCore::QNetworkReplyHandlerCallQueue::unlock (this=0xdc9e8a8) at platform/network/qt/QNetworkReplyHandler.cpp:247
+#58 0x0000000008ee9985 in WebCore::QueueLocker::~QueueLocker (this=0x7ffffffdd368, __in_chrg=<optimized out>)
+    at platform/network/qt/QNetworkReplyHandler.cpp:275
+#59 0x0000000008eea52b in WebCore::QNetworkReplyWrapper::emitMetaDataChanged (this=0xdc9f320) at platform/network/qt/QNetworkReplyHandler.cpp:412
+#60 0x0000000008eea284 in WebCore::QNetworkReplyWrapper::receiveSniffedMIMEType (this=0xdc9f320) at platform/network/qt/QNetworkReplyHandler.cpp:376
+#61 0x0000000008eea136 in WebCore::QNetworkReplyWrapper::receiveMetaData (this=0xdc9f320) at platform/network/qt/QNetworkReplyHandler.cpp:362    data=0xdcdd080 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241) at loader/cache/CachedRawResource.cpp:110
+#51 0x0000000008b5dbf9 in WebCore::CachedRawResource::addDataBuffer (this=0xdd34370, data=0xdc44f00) at loader/cache/CachedRawResource.cpp:66
+#52 0x0000000008bd362a in WebCore::SubresourceLoader::didReceiveDataOrBuffer (this=0xdc9da70,
+    data=0xdd3d280 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241, prpBuffer=..., encodedDataLength=-1,
+    dataPayloadType=WebCore::DataPayloadBytes) at loader/SubresourceLoader.cpp:250
+#53 0x0000000008bd3380 in WebCore::SubresourceLoader::didReceiveData (this=0xdc9da70,
+    data=0xdd3d280 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241, encodedDataLength=-1, dataPayloadType=WebCore::DataPayloadBytes)
+    at loader/SubresourceLoader.cpp:226
+#54 0x0000000008bc92f8 in WebCore::ResourceLoader::didReceiveData (this=0xdc9da70,
+    data=0xdd3d280 "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n  <!-- Code injected by live-server -->\n<script type=\"text/javascript\">\n\t// <![C
+DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., length=1241, encodedDataLength=-1) at loader/ResourceLoader.cpp:475
+#55 0x0000000008eec442 in WebCore::QNetworkReplyHandler::forwardData (this=0xdc9e870) at platform/network/qt/QNetworkReplyHandler.cpp:704
+#56 0x0000000008ee992a in WebCore::QNetworkReplyHandlerCallQueue::flush (this=0xdc9e8a8) at platform/network/qt/QNetworkReplyHandler.cpp:267
+#57 0x0000000008ee969a in WebCore::QNetworkReplyHandlerCallQueue::unlock (this=0xdc9e8a8) at platform/network/qt/QNetworkReplyHandler.cpp:247
+#58 0x0000000008ee9985 in WebCore::QueueLocker::~QueueLocker (this=0x7ffffffdd368, __in_chrg=<optimized out>)
+    at platform/network/qt/QNetworkReplyHandler.cpp:275
+#59 0x0000000008eea52b in WebCore::QNetworkReplyWrapper::emitMetaDataChanged (this=0xdc9f320) at platform/network/qt/QNetworkReplyHandler.cpp:412
+#60 0x0000000008eea284 in WebCore::QNetworkReplyWrapper::receiveSniffedMIMEType (this=0xdc9f320) at platform/network/qt/QNetworkReplyHandler.cpp:376
+#61 0x0000000008eea136 in WebCore::QNetworkReplyWrapper::receiveMetaData (this=0xdc9f320) at platform/network/qt/QNetworkReplyHandler.cpp:362
+---Type <return> to continue, or q <return> to quit---
+#62 0x0000000008eed204 in WebCore::QNetworkReplyWrapper::qt_static_metacall (_o=0xdc9f320, _c=QMetaObject::InvokeMetaMethod, _id=0, _a=0x7ffffffdd580)
+    at .moc/moc_QNetworkReplyHandler.cpp:178
+#63 0x000000000a94484e in QMetaObject::activate (sender=0xdd35e60, signalOffset=3, local_signal_index=0, argv=0x0) at kernel/qobject.cpp:3713
+#64 0x000000000a94403e in QMetaObject::activate (sender=0xdd35e60, m=0xd736e00 <QIODevice::staticMetaObject>, local_signal_index=0, argv=0x0)
+    at kernel/qobject.cpp:3578
+#65 0x000000000a9c5a49 in QIODevice::readyRead (this=0xdd35e60) at .moc/moc_qiodevice.cpp:155
+#66 0x000000000a66c2ba in QNetworkReplyHttpImplPrivate::replyDownloadProgressSlot (this=0xdd367f0, bytesReceived=1241, bytesTotal=1250)
+    at access/qnetworkreplyhttpimpl.cpp:1214
+#67 0x000000000a6e0a14 in QNetworkReplyHttpImpl::qt_static_metacall (_o=0xdd35e60, _c=QMetaObject::InvokeMetaMethod, _id=19, _a=0x7fffa0005080)
+    at .moc/moc_qnetworkreplyhttpimpl_p.cpp:246
+#68 0x000000000a93c957 in QMetaCallEvent::placeMetaCall (this=0x7fffa00050e0, object=0xdd35e60) at kernel/qobject.cpp:486
+#69 0x000000000a93dab3 in QObject::event (this=0xdd35e60, e=0x7fffa00050e0) at kernel/qobject.cpp:1239
+#70 0x00000000085985fe in QApplicationPrivate::notify_helper (this=0xd98a6e0, receiver=0xdd35e60, e=0x7fffa00050e0) at kernel/qapplication.cpp:3716
+#71 0x0000000008595d63 in QApplication::notify (this=0x7ffffffddfa0, receiver=0xdd35e60, e=0x7fffa00050e0) at kernel/qapplication.cpp:3160
+#72 0x000000000a90dc89 in QCoreApplication::notifyInternal (this=0x7ffffffddfa0, receiver=0xdd35e60, event=0x7fffa00050e0) at kernel/qcoreapplication.cpp:965
+#73 0x0000000008559015 in QCoreApplication::sendEvent (receiver=0xdd35e60, event=0x7fffa00050e0)
+    at /mnt/src/ariya/phantomjs/src/qt/qtbase/include/QtCore/../../src/corelib/kernel/qcoreapplication.h:224
+#74 0x000000000a90f089 in QCoreApplicationPrivate::sendPostedEvents (receiver=0x0, event_type=0, data=0xd98a830) at kernel/qcoreapplication.cpp:1593
+#75 0x000000000a970b8c in QEventDispatcherUNIX::processEvents (this=0xd98c4e0, flags=...) at kernel/qeventdispatcher_unix.cpp:579
+#76 0x000000000a258fa0 in QUnixEventDispatcherQPA::processEvents (this=0xd98c4e0, flags=...) at eventdispatchers/qunixeventdispatcher.cpp:62
+#77 0x000000000a90a70a in QEventLoop::processEvents (this=0x7ffffffdded0, flags=...) at kernel/qeventloop.cpp:128
+#78 0x000000000a90aa39 in QEventLoop::exec (this=0x7ffffffdded0, flags=...) at kernel/qeventloop.cpp:204
+#79 0x000000000a90e3fe in QCoreApplication::exec () at kernel/qcoreapplication.cpp:1229
+#80 0x000000000a277222 in QGuiApplication::exec () at kernel/qguiapplication.cpp:1527
+#81 0x0000000008595709 in QApplication::exec () at kernel/qapplication.cpp:2976
+#82 0x0000000008509b12 in inner_main (argc=2, argv=0x7ffffffde108) at main.cpp:67
+#83 0x0000000008509c3d in main (argc=2, argv=0x7ffffffde108) at main.cpp:81
+
+(gdb) up
+#1  0x000000000907f702 in WebCore::WebSocketChannel::didOpenSocketStream (this=0xdce4b90, handle=0xdcc0a50) at Modules/websockets/WebSocketChannel.cpp:257
+257     Modules/websockets/WebSocketChannel.cpp: No such file or directory.
+(gdb) print handle
+$1 = (WebCore::SocketStreamHandle *) 0xdcc0a50
+(gdb) print m_handle
+$2 = {m_ptr = 0x0}
