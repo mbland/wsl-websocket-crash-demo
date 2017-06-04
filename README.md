@@ -199,21 +199,19 @@ $2 = {m_ptr = 0x0}
 ```
 
 `gdb/connect.txt` shows the location of the `connect()` calls leading up to
-the crash. The first specifies `QAbstractSocket::IPv4Protocol`:
-```
-#0  connect () at ../sysdeps/unix/syscall-template.S:84
-#1  0x000000000a6bdebd in qt_safe_connect (sockfd=7, addr=0x7fffb631f380, addrlen=16)
-    at ../../include/QtNetwork/5.5.1/QtNetwork/private/../../../../../src/network/socket/qnet_unix_p.h:141
-#2  0x000000000a6be856 in QNativeSocketEnginePrivate::nativeConnect (this=0x7fffa00048c0, addr=..., port=8080) at socket/qnativesocketengine_unix.cpp:389
-#3  0x000000000a6bb68a in QNativeSocketEngine::connectToHost (this=0x7fffa00047c0, address=..., port=8080) at socket/qnativesocketengine.cpp:541
-#4  0x000000000a6b1167 in QAbstractSocketPrivate::_q_connectToNextAddress (this=0x7fffa0003970) at socket/qabstractsocket.cpp:1130
-#5  0x000000000a6b0ef9 in QAbstractSocketPrivate::_q_startConnecting (this=0x7fffa0003970, hostInfo=...) at socket/qabstractsocket.cpp:1067
-#6  0x000000000a6b2711 in QAbstractSocket::connectToHost (this=0x7fffa00032c0, hostName=..., port=8080, openMode=..., protocol=QAbstractSocket::IPv4Protocol)
-    at socket/qabstractsocket.cpp:1652
-#7  0x000000000a7008a2 in QHttpNetworkConnectionChannel::ensureConnection (this=0x7fffa00017c8) at access/qhttpnetworkconnectionchannel.cpp:354
-```
+the crash on WSL, and `gdb/connect-native.txt` shows the `connect()` calls for
+a successful run on native Ubuntu. Of note:
 
-the second, `QAbstractSocket::AnyIPProtocol`:
+* Whereas WSL spawns one connection from `clone()`, native Ubuntu spawns two.
+* Both spawn a connection for a WebSocket.
+* Native Ubuntu appears to spawn one more connection from an incoming event,
+  while WSL appears to crash while spawining the previous connection (see
+  `gdb/stack-trace.txt`).
+* The stacks begin to diverge in `QAbstractSocketPrivate::_q_connectToNextAddress`:
+  * The `connect()` stack points to `socket/qabstractsocket.cpp:1130`
+  * The crash stack points to `socket/qabstractsocket.cpp:1132`
+
+Top of the `connect()` stack before the crash:
 ```
 #0  connect () at ../sysdeps/unix/syscall-template.S:84
 #1  0x000000000a6bdebd in qt_safe_connect (sockfd=8, addr=0x7ffffffdb350, addrlen=16)
@@ -231,8 +229,31 @@ the second, `QAbstractSocket::AnyIPProtocol`:
 #9  0x000000000907e2c0 in WebCore::SocketStreamHandle::create (url=..., client=0xdd452b0) at platform/network/qt/SocketStreamHandle.h:58
 #10 0x000000000907e91c in WebCore::WebSocketChannel::connect (this=0xdd452b0, url=..., protocol=...) at Modules/websockets/WebSocketChannel.cpp:114
 #11 0x000000000907b899 in WebCore::WebSocket::connect (this=0xdd44f60, url=..., protocols=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:289
-#12 0x000000000907abf7 in WebCore::WebSocket::create (context=0xdcc3830, url=..., protocols=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:186
-#13 0x000000000907aaba in WebCore::WebSocket::create (context=0xdcc3830, url=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:173
+```
+
+Top of the stack trace from the crash:
+```
+#0  0x000000000a1edf70 in WTFCrash () at wtf/Assertions.cpp:345#1  0x000000000907f702 in WebCore::WebSocketChannel::didOpenSocketStream (this=0xdd396b0, handle=0xdd2dcb0) at Modules/websockets/WebSocketChannel.cpp:257
+#2  0x0000000009098158 in WebCore::SocketStreamHandlePrivate::socketConnected (this=0xdd2dd50) at platform/network/qt/SocketStreamHandleQt.cpp:107
+#3  0x000000000909931d in WebCore::SocketStreamHandlePrivate::qt_static_metacall (_o=0xdd2dd50, _c=QMetaObject::InvokeMetaMethod, _id=0, _a=0x7ffffffdb360)
+    at .moc/moc_SocketStreamHandlePrivate.cpp:108
+#4  0x000000000a94484e in QMetaObject::activate (sender=0xdce5270, signalOffset=7, local_signal_index=1, argv=0x0) at kernel/qobject.cpp:3713
+#5  0x000000000a94403e in QMetaObject::activate (sender=0xdce5270, m=0xd731240 <QAbstractSocket::staticMetaObject>, local_signal_index=1, argv=0x0)
+    at kernel/qobject.cpp:3578
+#6  0x000000000a6b5b23 in QAbstractSocket::connected (this=0xdce5270) at .moc/moc_qabstractsocket.cpp:367
+#7  0x000000000a6b1a10 in QAbstractSocketPrivate::fetchConnectionParameters (this=0xdcb9720) at socket/qabstractsocket.cpp:1321
+#8  0x000000000a6b1177 in QAbstractSocketPrivate::_q_connectToNextAddress (this=0xdcb9720) at socket/qabstractsocket.cpp:1132
+#9  0x000000000a6b0ef9 in QAbstractSocketPrivate::_q_startConnecting (this=0xdcb9720, hostInfo=...) at socket/qabstractsocket.cpp:1067
+#10 0x000000000a6b2711 in QAbstractSocket::connectToHost (this=0xdce5270, hostName=..., port=8080, openMode=..., protocol=QAbstractSocket::AnyIPProtocol)
+    at socket/qabstractsocket.cpp:1652
+#11 0x0000000009097aa6 in WebCore::SocketStreamHandlePrivate::SocketStreamHandlePrivate (this=0xdd2dd50, streamHandle=0xdd2dcb0, url=...)
+    at platform/network/qt/SocketStreamHandleQt.cpp:70
+#12 0x0000000009098cc1 in WebCore::SocketStreamHandle::SocketStreamHandle (this=0xdd2dcb0, url=..., client=0xdd396b0)
+    at platform/network/qt/SocketStreamHandleQt.cpp:190
+#13 0x000000000907e2c0 in WebCore::SocketStreamHandle::create (url=..., client=0xdd396b0) at platform/network/qt/SocketStreamHandle.h:58
+#14 0x000000000907e91c in WebCore::WebSocketChannel::connect (this=0xdd396b0, url=..., protocol=...) at Modules/websockets/WebSocketChannel.cpp:114
+#15 0x000000000907b899 in WebCore::WebSocket::connect (this=0xdd20ae0, url=..., protocols=..., ec=@0x7ffffffdb8cc: 0) at Modules/websockets/WebSocket.cpp:289
+
 ```
 
 `gdb/pselect.txt` shows that the program makes use of the `pselect()` system

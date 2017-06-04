@@ -3,7 +3,7 @@ Breakpoint 3 at 0x7ffffc347530: connect. (2 locations)
 (gdb) r
 The program being debugged has been started already.
 Start it from the beginning? (y or n) y
-Starting program: /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs /home/msb/src/mbland/wsl-websocket-crash-demo/visit-site.js
+Starting program: /.../wsl-websocket-crash-demo/phantomjs /.../wsl-websocket-crash-demo/visit-site.js
 [Thread debugging using libthread_db enabled]
 Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
 [New Thread 0x7fffb82b0700 (LWP 24749)]
@@ -178,31 +178,31 @@ DATA[  <-- For SVG support\n\tif ('WebSocket' in window) {\n\t\t(function("..., 
 Continuing.
 ASSERTION FAILED: handle == m_handle
 Modules/websockets/WebSocketChannel.cpp(257) : virtual void WebCore::WebSocketChannel::didOpenSocketStream(WebCore::SocketStreamHandle*)
-1   0xa1edf6b /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x21edf6b) [0xa1edf6b]
-2   0x907f702 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x107f702) [0x907f702]
-3   0x9098158 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x1098158) [0x9098158]
-4   0x909931d /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x109931d) [0x909931d]
-5   0xa94484e /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x294484e) [0xa94484e]
-6   0xa94403e /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x294403e) [0xa94403e]
-7   0xa6b5b23 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x26b5b23) [0xa6b5b23]
-8   0xa6b1a10 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x26b1a10) [0xa6b1a10]
-9   0xa6b1177 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x26b1177) [0xa6b1177]
-10  0xa6b0ef9 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x26b0ef9) [0xa6b0ef9]
-11  0xa6b2711 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x26b2711) [0xa6b2711]
-12  0x9097aa6 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x1097aa6) [0x9097aa6]
-13  0x9098cc1 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x1098cc1) [0x9098cc1]
-14  0x907e2c0 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x107e2c0) [0x907e2c0]
-15  0x907e91c /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x107e91c) [0x907e91c]
-16  0x907b899 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x107b899) [0x907b899]
-17  0x907abf7 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x107abf7) [0x907abf7]
-18  0x907aaba /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x107aaba) [0x907aaba]
-19  0x911eaf0 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x111eaf0) [0x911eaf0]
-20  0x911f2a6 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x111f2a6) [0x911f2a6]
-21  0xa09b034 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x209b034) [0xa09b034]
-22  0xa09d66a /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x209d66a) [0xa09d66a]
-23  0xa09daf3 /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x209daf3) [0xa09daf3]
-24  0xa09b24d /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x209b24d) [0xa09b24d]
-25  0xc57da9a /home/msb/src/mbland/wsl-websocket-crash-demo/phantomjs(+0x457da9a) [0xc57da9a]
+1   0xa1edf6b /.../wsl-websocket-crash-demo/phantomjs(+0x21edf6b) [0xa1edf6b]
+2   0x907f702 /.../wsl-websocket-crash-demo/phantomjs(+0x107f702) [0x907f702]
+3   0x9098158 /.../wsl-websocket-crash-demo/phantomjs(+0x1098158) [0x9098158]
+4   0x909931d /.../wsl-websocket-crash-demo/phantomjs(+0x109931d) [0x909931d]
+5   0xa94484e /.../wsl-websocket-crash-demo/phantomjs(+0x294484e) [0xa94484e]
+6   0xa94403e /.../wsl-websocket-crash-demo/phantomjs(+0x294403e) [0xa94403e]
+7   0xa6b5b23 /.../wsl-websocket-crash-demo/phantomjs(+0x26b5b23) [0xa6b5b23]
+8   0xa6b1a10 /.../wsl-websocket-crash-demo/phantomjs(+0x26b1a10) [0xa6b1a10]
+9   0xa6b1177 /.../wsl-websocket-crash-demo/phantomjs(+0x26b1177) [0xa6b1177]
+10  0xa6b0ef9 /.../wsl-websocket-crash-demo/phantomjs(+0x26b0ef9) [0xa6b0ef9]
+11  0xa6b2711 /.../wsl-websocket-crash-demo/phantomjs(+0x26b2711) [0xa6b2711]
+12  0x9097aa6 /.../wsl-websocket-crash-demo/phantomjs(+0x1097aa6) [0x9097aa6]
+13  0x9098cc1 /.../wsl-websocket-crash-demo/phantomjs(+0x1098cc1) [0x9098cc1]
+14  0x907e2c0 /.../wsl-websocket-crash-demo/phantomjs(+0x107e2c0) [0x907e2c0]
+15  0x907e91c /.../wsl-websocket-crash-demo/phantomjs(+0x107e91c) [0x907e91c]
+16  0x907b899 /.../wsl-websocket-crash-demo/phantomjs(+0x107b899) [0x907b899]
+17  0x907abf7 /.../wsl-websocket-crash-demo/phantomjs(+0x107abf7) [0x907abf7]
+18  0x907aaba /.../wsl-websocket-crash-demo/phantomjs(+0x107aaba) [0x907aaba]
+19  0x911eaf0 /.../wsl-websocket-crash-demo/phantomjs(+0x111eaf0) [0x911eaf0]
+20  0x911f2a6 /.../wsl-websocket-crash-demo/phantomjs(+0x111f2a6) [0x911f2a6]
+21  0xa09b034 /.../wsl-websocket-crash-demo/phantomjs(+0x209b034) [0xa09b034]
+22  0xa09d66a /.../wsl-websocket-crash-demo/phantomjs(+0x209d66a) [0xa09d66a]
+23  0xa09daf3 /.../wsl-websocket-crash-demo/phantomjs(+0x209daf3) [0xa09daf3]
+24  0xa09b24d /.../wsl-websocket-crash-demo/phantomjs(+0x209b24d) [0xa09b24d]
+25  0xc57da9a /.../wsl-websocket-crash-demo/phantomjs(+0x457da9a) [0xc57da9a]
 
 Thread 1 "phantomjs" received signal SIGSEGV, Segmentation fault.
 0x000000000a1edf70 in WTFCrash () at wtf/Assertions.cpp:345
