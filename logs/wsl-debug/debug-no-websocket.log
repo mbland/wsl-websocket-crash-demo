@@ -1,0 +1,73 @@
+Starting up http-server, serving .
+Available on:
+  http://127.0.0.1:8080
+Hit CTRL-C to stop the server
+Running PhantomJS as: /.../wsl-websocket-crash-demo/phantomjs --debug=true /.../wsl-websocket-crash-demo/visit-site.js
+2017-06-04T11:18:45 [DEBUG] CookieJar - Created but will not store cookies (use option '--cookies-file=<filename>' to enable persistent cookie storage)
+2017-06-04T11:18:45 [DEBUG] Set  "http"  proxy to:  "" : 1080
+2017-06-04T11:18:45 [DEBUG] Phantom - execute: Configuration
+2017-06-04T11:18:45 [DEBUG]      0 objectName : ""
+2017-06-04T11:18:45 [DEBUG]      1 cookiesFile : ""
+2017-06-04T11:18:45 [DEBUG]      2 diskCacheEnabled : "false"
+2017-06-04T11:18:45 [DEBUG]      3 maxDiskCacheSize : "-1"
+2017-06-04T11:18:45 [DEBUG]      4 diskCachePath : ""
+2017-06-04T11:18:45 [DEBUG]      5 ignoreSslErrors : "false"
+2017-06-04T11:18:45 [DEBUG]      6 localUrlAccessEnabled : "true"
+2017-06-04T11:18:45 [DEBUG]      7 localToRemoteUrlAccessEnabled : "false"
+2017-06-04T11:18:45 [DEBUG]      8 outputEncoding : "UTF-8"
+2017-06-04T11:18:45 [DEBUG]      9 proxyType : "http"
+2017-06-04T11:18:45 [DEBUG]      10 proxy : ":1080"
+2017-06-04T11:18:45 [DEBUG]      11 proxyAuth : ":"
+2017-06-04T11:18:45 [DEBUG]      12 scriptEncoding : "UTF-8"
+2017-06-04T11:18:45 [DEBUG]      13 webSecurityEnabled : "true"
+2017-06-04T11:18:45 [DEBUG]      14 offlineStoragePath : ""
+2017-06-04T11:18:45 [DEBUG]      15 localStoragePath : ""
+2017-06-04T11:18:45 [DEBUG]      16 localStorageDefaultQuota : "-1"
+2017-06-04T11:18:45 [DEBUG]      17 offlineStorageDefaultQuota : "-1"
+2017-06-04T11:18:45 [DEBUG]      18 printDebugMessages : "true"
+2017-06-04T11:18:45 [DEBUG]      19 javascriptCanOpenWindows : "true"
+2017-06-04T11:18:45 [DEBUG]      20 javascriptCanCloseWindows : "true"
+2017-06-04T11:18:45 [DEBUG]      21 sslProtocol : "default"
+2017-06-04T11:18:45 [DEBUG]      22 sslCiphers : "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-RC4-SHA:ECDHE-RSA-RC4-SHA:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:RC4-SHA:RC4-MD5"
+2017-06-04T11:18:45 [DEBUG]      23 sslCertificatesPath : ""
+2017-06-04T11:18:45 [DEBUG]      24 sslClientCertificateFile : ""
+2017-06-04T11:18:45 [DEBUG]      25 sslClientKeyFile : ""
+2017-06-04T11:18:45 [DEBUG]      26 sslClientKeyPassphrase : ""
+2017-06-04T11:18:45 [DEBUG]      27 webdriver : ":"
+2017-06-04T11:18:45 [DEBUG]      28 webdriverLogFile : ""
+2017-06-04T11:18:45 [DEBUG]      29 webdriverLogLevel : "INFO"
+2017-06-04T11:18:45 [DEBUG]      30 webdriverSeleniumGridHub : ""
+2017-06-04T11:18:45 [DEBUG] Phantom - execute: Script & Arguments
+2017-06-04T11:18:45 [DEBUG]      script: "/.../wsl-websocket-crash-demo/visit-site.js"
+2017-06-04T11:18:45 [DEBUG] Phantom - execute: Starting normal mode
+2017-06-04T11:18:46 [DEBUG] WebPage - setupFrame ""
+2017-06-04T11:18:46 [DEBUG] FileSystem - _open: ":/modules/fs.js" QMap(("mode", QVariant(QString, "r")))
+2017-06-04T11:18:46 [DEBUG] FileSystem - _open: ":/modules/system.js" QMap(("mode", QVariant(QString, "r")))
+2017-06-04T11:18:46 [DEBUG] FileSystem - _open: ":/modules/webpage.js" QMap(("mode", QVariant(QString, "r")))
+2017-06-04T11:18:46 [DEBUG] WebPage - updateLoadingProgress: 10
+[Sun Jun 04 2017 11:18:46 GMT-0400 (DST)] "GET /" "Mozilla/5.0 (Unknown; Linux x86_64) AppleWebKit/538.1 (KHTML, like Gecko) PhantomJS/2.1.1 Safari/538.1"
+2017-06-04T11:18:46 [DEBUG] WebPage - updateLoadingProgress: 50
+2017-06-04T11:18:46 [DEBUG] WebPage - updateLoadingProgress: 100
+STATUS: success
+<!DOCTYPE html><html><head>
+  </head>
+  <body>
+  
+
+</body></html>
+2017-06-04T11:18:46 [DEBUG] WebPage - updateLoadingProgress: 10
+2017-06-04T11:18:46 [DEBUG] WebPage - updateLoadingProgress: 100
+2017-06-04T11:18:46 [DEBUG] WebPage - setupFrame ""
+2017-06-04T11:18:46 [DEBUG] FileSystem - _open: ":/modules/fs.js" QMap(("mode", QVariant(QString, "r")))
+2017-06-04T11:18:46 [DEBUG] FileSystem - _open: ":/modules/system.js" QMap(("mode", QVariant(QString, "r")))
+2017-06-04T11:18:46 [DEBUG] FileSystem - _open: ":/modules/webpage.js" QMap(("mode", QVariant(QString, "r")))
+2017-06-04T11:18:46 [DEBUG] WebPage - updateLoadingProgress: 10
+2017-06-04T11:18:46 [DEBUG] WebPage - setupFrame ""
+2017-06-04T11:18:46 [DEBUG] FileSystem - _open: ":/modules/fs.js" QMap(("mode", QVariant(QString, "r")))
+2017-06-04T11:18:46 [DEBUG] FileSystem - _open: ":/modules/system.js" QMap(("mode", QVariant(QString, "r")))
+2017-06-04T11:18:46 [DEBUG] FileSystem - _open: ":/modules/webpage.js" QMap(("mode", QVariant(QString, "r")))
+2017-06-04T11:18:46 [DEBUG] WebPage - updateLoadingProgress: 100
+2017-06-04T11:18:46 [DEBUG] WebPage - setupFrame ""
+2017-06-04T11:18:46 [DEBUG] WebPage - setupFrame ""
+LEAK: 16 WebCoreNode
+http-server stopped.

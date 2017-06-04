@@ -1,0 +1,81 @@
+write(6, "\1\0\0\0\0\0\0\0", 8)         = 8
+pselect6(4, [3], [], [], {0, 0}, {NULL, 8}) = 1 (in [3], left {0, 0})
+read(3, "\1\0\0\0\0\0\0\0", 8)          = 8
+fcntl(8, F_SETFD, FD_CLOEXEC)           = 0
+read(8, "<?xml version=\"1.0\" encoding=\"ut"..., 16384) = 2719
+read(8, "", 13665)                      = 0
+close(8)                                = 0
+fcntl(8, F_SETFD, FD_CLOEXEC)           = 0
+read(8, "<?xml version=\"1.0\" encoding=\"ut"..., 16384) = 2719
+read(8, "", 13665)                      = 0
+close(8)                                = 0
+socket(PF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 8
+setsockopt(8, SOL_SOCKET, SO_OOBINLINE, [1], 4) = 0
+connect(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+getsockname(8, {sa_family=AF_INET, sin_port=htons(62351), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
+getpeername(8, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
+getsockopt(8, SOL_SOCKET, SO_TYPE, [1], [4]) = 0
+write(2, "ASSERTION FAILED: handle == m_ha"..., 37ASSERTION FAILED: handle == m_handle
+) = 37
+write(2, "Modules/websockets/WebSocketChan"..., 137Modules/websockets/WebSocketChannel.cpp(257) : virtual void WebCore::WebSocketChannel::didOpenSocketStream(WebCore::SocketStreamHandle*)
+) = 137
+futex(0x7fcf7b007110, FUTEX_WAKE_PRIVATE, 2147483647) = 0
+futex(0x7fcf7b225680, FUTEX_WAKE_PRIVATE, 2147483647) = 0
+write(2, "1   0x7fcf803edf6b /..."..., 1041   0x7fcf803edf6b .../wsl-websocket-crash-demo/phantomjs(+0x21edf6b) [0x7fcf803edf6b]
+) = 104
+write(2, "2   0x7fcf7f27f702 /..."..., 1042   0x7fcf7f27f702 .../wsl-websocket-crash-demo/phantomjs(+0x107f702) [0x7fcf7f27f702]
+) = 104
+write(2, "3   0x7fcf7f298158 /..."..., 1043   0x7fcf7f298158 .../wsl-websocket-crash-demo/phantomjs(+0x1098158) [0x7fcf7f298158]
+) = 104
+write(2, "4   0x7fcf7f29931d /..."..., 1044   0x7fcf7f29931d .../wsl-websocket-crash-demo/phantomjs(+0x109931d) [0x7fcf7f29931d]
+) = 104
+write(2, "5   0x7fcf80b4484e /..."..., 1045   0x7fcf80b4484e .../wsl-websocket-crash-demo/phantomjs(+0x294484e) [0x7fcf80b4484e]
+) = 104
+write(2, "6   0x7fcf80b4403e /..."..., 1046   0x7fcf80b4403e .../wsl-websocket-crash-demo/phantomjs(+0x294403e) [0x7fcf80b4403e]
+) = 104
+write(2, "7   0x7fcf808b5b23 /..."..., 1047   0x7fcf808b5b23 .../wsl-websocket-crash-demo/phantomjs(+0x26b5b23) [0x7fcf808b5b23]
+) = 104
+write(2, "8   0x7fcf808b1a10 /..."..., 1048   0x7fcf808b1a10 .../wsl-websocket-crash-demo/phantomjs(+0x26b1a10) [0x7fcf808b1a10]
+) = 104
+write(2, "9   0x7fcf808b1177 /..."..., 1049   0x7fcf808b1177 .../wsl-websocket-crash-demo/phantomjs(+0x26b1177) [0x7fcf808b1177]
+) = 104
+write(2, "10  0x7fcf808b0ef9 /..."..., 10410  0x7fcf808b0ef9 .../wsl-websocket-crash-demo/phantomjs(+0x26b0ef9) [0x7fcf808b0ef9]
+) = 104
+write(2, "11  0x7fcf808b2711 /..."..., 10411  0x7fcf808b2711 .../wsl-websocket-crash-demo/phantomjs(+0x26b2711) [0x7fcf808b2711]
+) = 104
+write(2, "12  0x7fcf7f297aa6 /..."..., 10412  0x7fcf7f297aa6 .../wsl-websocket-crash-demo/phantomjs(+0x1097aa6) [0x7fcf7f297aa6]
+) = 104
+write(2, "13  0x7fcf7f298cc1 /..."..., 10413  0x7fcf7f298cc1 .../wsl-websocket-crash-demo/phantomjs(+0x1098cc1) [0x7fcf7f298cc1]
+) = 104
+write(2, "14  0x7fcf7f27e2c0 /..."..., 10414  0x7fcf7f27e2c0 .../wsl-websocket-crash-demo/phantomjs(+0x107e2c0) [0x7fcf7f27e2c0]
+) = 104
+write(2, "15  0x7fcf7f27e91c /..."..., 10415  0x7fcf7f27e91c .../wsl-websocket-crash-demo/phantomjs(+0x107e91c) [0x7fcf7f27e91c]
+) = 104
+write(2, "16  0x7fcf7f27b899 /..."..., 10416  0x7fcf7f27b899 .../wsl-websocket-crash-demo/phantomjs(+0x107b899) [0x7fcf7f27b899]
+) = 104
+write(2, "17  0x7fcf7f27abf7 /..."..., 10417  0x7fcf7f27abf7 .../wsl-websocket-crash-demo/phantomjs(+0x107abf7) [0x7fcf7f27abf7]
+) = 104
+write(2, "18  0x7fcf7f27aaba /..."..., 10418  0x7fcf7f27aaba .../wsl-websocket-crash-demo/phantomjs(+0x107aaba) [0x7fcf7f27aaba]
+) = 104
+write(2, "19  0x7fcf7f31eaf0 /..."..., 10419  0x7fcf7f31eaf0 .../wsl-websocket-crash-demo/phantomjs(+0x111eaf0) [0x7fcf7f31eaf0]
+) = 104
+write(2, "20  0x7fcf7f31f2a6 /..."..., 10420  0x7fcf7f31f2a6 .../wsl-websocket-crash-demo/phantomjs(+0x111f2a6) [0x7fcf7f31f2a6]
+) = 104
+write(2, "21  0x7fcf8029b034 /..."..., 10421  0x7fcf8029b034 .../wsl-websocket-crash-demo/phantomjs(+0x209b034) [0x7fcf8029b034]
+) = 104
+write(2, "22  0x7fcf8029d66a /..."..., 10422  0x7fcf8029d66a .../wsl-websocket-crash-demo/phantomjs(+0x209d66a) [0x7fcf8029d66a]
+) = 104
+write(2, "23  0x7fcf8029daf3 /..."..., 10423  0x7fcf8029daf3 .../wsl-websocket-crash-demo/phantomjs(+0x209daf3) [0x7fcf8029daf3]
+) = 104
+write(2, "24  0x7fcf8029b24d /..."..., 10424  0x7fcf8029b24d .../wsl-websocket-crash-demo/phantomjs(+0x209b24d) [0x7fcf8029b24d]
+) = 104
+write(2, "25  0x7fcf8277da9a /..."..., 10425  0x7fcf8277da9a .../wsl-websocket-crash-demo/phantomjs(+0x457da9a) [0x7fcf8277da9a]
+) = 104
+--- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_MAPERR, si_addr=0xbbadbeef} ---
+write(2, "PhantomJS has crashed. Please re"..., 127PhantomJS has crashed. Please read the bug reporting guide at
+<http://phantomjs.org/bug-reporting.html> and file a bug report.
+) = 127
+tgkill(25568, 25568, SIGSEGV)           = 0
+--- SIGSEGV {si_signo=SIGSEGV, si_code=SI_TKILL, si_pid=25568, si_uid=1000} ---
++++ killed by SIGSEGV (core dumped) +++
+.../wsl-websocket-crash-demo/run-demo: line 79: 25566 Segmentation fault      (core dumped) "${PHANTOMJS_CMD[@]}"
